@@ -1,7 +1,8 @@
 import re
 from functools import lru_cache
 
-from sentence_transformers import SentenceTransformer
+import numpy as np
+from fastembed import TextEmbedding
 
 
 # ============================================================
@@ -13,10 +14,13 @@ def get_embedding_model():
     """
     Load the local embedding model once.
 
-    The model runs locally and does not require an API key.
+    FastEmbed runs the embedding model locally with
+    ONNX Runtime and does not require an API key.
     """
 
-    return SentenceTransformer("all-MiniLM-L6-v2")
+    return TextEmbedding(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 
 # ============================================================
@@ -663,7 +667,7 @@ def semantic_scores(
 ) -> list[float]:
     """
     Calculate cosine similarity using the local
-    sentence-transformer model.
+    FastEmbed embedding model.
     """
 
     if not passages:
@@ -671,30 +675,60 @@ def semantic_scores(
 
     model = get_embedding_model()
 
-    query_embedding = model.encode(
-        query,
-        normalize_embeddings=True,
+    query_embedding = np.asarray(
+        list(
+            model.embed([query])
+        )[0],
+        dtype=np.float32,
     )
 
-    passage_embeddings = model.encode(
-        passages,
-        normalize_embeddings=True,
+    passage_embeddings = np.asarray(
+        list(
+            model.embed(passages)
+        ),
+        dtype=np.float32,
     )
 
-    scores = []
+    query_norm = np.linalg.norm(
+        query_embedding
+    )
 
-    for embedding in passage_embeddings:
+    passage_norms = np.linalg.norm(
+        passage_embeddings,
+        axis=1,
+    )
 
-        score = float(
-            embedding
-            @ query_embedding
-        )
+    if query_norm == 0:
+        return [
+            0.0
+            for _ in passages
+        ]
 
-        scores.append(
-            score
-        )
+    safe_passage_norms = np.where(
+        passage_norms == 0,
+        1.0,
+        passage_norms,
+    )
 
-    return scores
+    normalized_query = (
+        query_embedding
+        / query_norm
+    )
+
+    normalized_passages = (
+        passage_embeddings
+        / safe_passage_norms[:, None]
+    )
+
+    scores = (
+        normalized_passages
+        @ normalized_query
+    )
+
+    return [
+        float(score)
+        for score in scores
+    ]
 
 
 # ============================================================
