@@ -50,7 +50,7 @@ sympy==1.13.1
 threadpoolctl==3.7.0
 tokenizers==0.23.2
 torch @ https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp312-cp312-linux_x86_64.whl ; sys_platform == "linux"
-torch==2.14.0 ; sys_platform == "darwin"
+torch==2.6.0 ; sys_platform == "darwin"
 tqdm==4.70.1
 transformers==5.17.0
 truststore==0.10.4
