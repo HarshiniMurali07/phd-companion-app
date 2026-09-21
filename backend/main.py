@@ -51,11 +51,13 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:5174",
         "https://phd-companion-app.vercel.app",
+        "https://phd-companion-74mwdwypy-harshinimurali07.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # =========================================================
 # ROUTES
@@ -72,9 +74,11 @@ app.include_router(
 app.include_router(
     connections.router
 )
+
 app.include_router(
     gaps.router
 )
+
 app.include_router(
     experiments.router
 )
@@ -83,10 +87,11 @@ app.include_router(
     learn.router
 )
 
+
 # =========================================================
 # ROOT
 # =========================================================
- 
+
 @app.get("/")
 def root():
     return {
