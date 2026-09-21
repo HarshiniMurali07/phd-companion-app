@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 
 import fitz
+from dotenv import load_dotenv
+from supabase import create_client 
 
 from fastapi import (
     APIRouter,
@@ -40,18 +42,100 @@ router = APIRouter(
 # FILE STORAGE
 # =========================================================
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv()
 
-if os.getenv("VERCEL"):
-    PAPERS_DIR = Path("/tmp/data/papers")
-else:
-    PAPERS_DIR = BASE_DIR.parent / "data" / "papers"
-
-PAPERS_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv(
+    "SUPABASE_SERVICE_ROLE_KEY"
 )
 
+if not SUPABASE_URL:
+    raise RuntimeError(
+        "SUPABASE_URL is not configured."
+    )
+
+if not SUPABASE_SERVICE_ROLE_KEY:
+    raise RuntimeError(
+        "SUPABASE_SERVICE_ROLE_KEY is not configured."
+    )
+
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
+)
+
+PAPERS_BUCKET = "papers"
+
+def upload_pdf_to_storage(
+    stored_filename: str,
+    contents: bytes,
+) -> str:
+    """
+    Upload a PDF to Supabase Storage and
+    return its public URL.
+    """
+
+    storage_path = stored_filename
+
+    supabase.storage.from_(
+        PAPERS_BUCKET
+    ).upload(
+        storage_path,
+        contents,
+        file_options={
+            "content-type": "application/pdf",
+            "upsert": False,
+        },
+    )
+
+    public_url = (
+        supabase.storage
+        .from_(PAPERS_BUCKET)
+        .get_public_url(
+            storage_path
+        )
+    )
+
+    return public_url
+
+
+def delete_pdf_from_storage(
+    file_path: str | None,
+):
+    """
+    Delete a stored PDF from Supabase Storage.
+
+    The database stores the public URL, so we
+    extract the storage path from that URL.
+    """
+
+    if not file_path:
+        return
+
+    marker = f"/storage/v1/object/public/{PAPERS_BUCKET}/"
+
+    if marker not in file_path:
+        return
+
+    storage_path = file_path.split(
+        marker,
+        1,
+    )[1]
+
+    if not storage_path:
+        return
+
+    try:
+        supabase.storage.from_(
+            PAPERS_BUCKET
+        ).remove(
+            [storage_path]
+        )
+    except Exception as exc:
+        print(
+            "Could not delete PDF from "
+            f"Supabase Storage: {exc}"
+        )
 
 # =========================================================
 # GENERAL TEXT CLEANING
@@ -1881,31 +1965,74 @@ async def upload_paper(
         filename,
     )
 
-    stored_filename = (
+            stored_filename = (
         f"{timestamp}_{safe_filename}"
-    )
-
-    stored_path = (
-        PAPERS_DIR
-        / stored_filename
     )
 
     try:
 
         contents = await file.read()
 
-        with open(
-            stored_path,
-            "wb",
-        ) as output_file:
+        # Upload the original PDF to Supabase Storage.
+        file_url = upload_pdf_to_storage(
+            stored_filename,
+            contents,
+        )
 
-            output_file.write(
-                contents
+        # Extract directly from the uploaded PDF bytes.
+        document = fitz.open(
+            stream=contents,
+            filetype="pdf",
+        )
+
+        try:
+            metadata = (
+                document.metadata
+                or {}
             )
 
-        extracted = extract_pdf_information(
-            str(stored_path)
-        )
+            extracted = {
+                "title": extract_title(
+                    document,
+                    metadata,
+                ),
+                "authors": extract_authors(
+                    document,
+                    metadata,
+                ),
+                "year": extract_year(
+                    document,
+                    metadata,
+                ),
+                "abstract": extract_abstract(
+                    document,
+                ),
+                "full_text": clean_text(
+                    "\n".join(
+                        page.get_text()
+                        for page in document
+                    )
+                ),
+                "sections": split_pdf_into_sections(
+                    document,
+                ),
+            }
+
+            extracted["sections"] = (
+                replace_abstract_section(
+                    extracted["sections"],
+                    extracted["abstract"],
+                )
+            )
+
+            extracted["sections"] = (
+                clean_sections(
+                    extracted["sections"],
+                )
+            )
+
+        finally:
+            document.close()   
 
         final_title = (
             title.strip()
@@ -1957,9 +2084,7 @@ async def upload_paper(
             full_text=extracted[
                 "full_text"
             ],
-            file_path=str(
-                stored_path
-            ),
+            file_path=file_url, 
             status="To Read",
             progress=0,
         )
@@ -2055,17 +2180,14 @@ async def upload_paper(
 
     except Exception as exc:
 
-        db.rollback()
+    db.rollback()
 
-        if stored_path.exists():
-
-            try:
-
-                stored_path.unlink()
-
-            except OSError:
-
-                pass
+    try:
+        delete_pdf_from_storage(
+            locals().get("file_url")
+        )
+    except Exception:
+        pass 
 
         raise HTTPException(
             status_code=500,
