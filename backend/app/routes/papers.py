@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -41,7 +42,10 @@ router = APIRouter(
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-PAPERS_DIR = BASE_DIR.parent / "data" / "papers"
+if os.getenv("VERCEL"):
+    PAPERS_DIR = Path("/tmp/data/papers")
+else:
+    PAPERS_DIR = BASE_DIR.parent / "data" / "papers"
 
 PAPERS_DIR.mkdir(
     parents=True,
