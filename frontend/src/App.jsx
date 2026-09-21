@@ -45,7 +45,10 @@ import {
 import "./paper-workspace.css";
 import PaperNotesPanel from "./components/PaperNotesPanel.jsx";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000"
+).replace(/\\/$/, "");
 
 /* =========================================================
    NAVIGATION
@@ -1418,6 +1421,7 @@ function UploadPaperModal({
     }
 
     if (
+      selectedFile.type !== "application/pdf" &&
       !selectedFile.name
         .toLowerCase()
         .endsWith(".pdf")
@@ -1507,13 +1511,18 @@ function UploadPaperModal({
         }
       );
 
-      const data =
-        await response.json();
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
       if (!response.ok) {
         throw new Error(
-          data.detail ||
-            "Could not upload the paper."
+          data?.detail ||
+            `Could not upload the paper (${response.status}).`
         );
       }
 
@@ -1530,220 +1539,643 @@ function UploadPaperModal({
     }
   }
 
+  const modalStyles = `
+    .phd-upload-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.48);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      overflow-y: auto;
+    }
+
+    .phd-upload-modal {
+      width: min(720px, 100%);
+      max-height: min(860px, calc(100vh - 48px));
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #e7eaf0;
+      border-radius: 24px;
+      box-shadow:
+        0 24px 70px rgba(15, 23, 42, 0.20),
+        0 8px 24px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+      box-sizing: border-box;
+      color: #172033;
+    }
+
+    .phd-upload-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .phd-upload-header-copy {
+      min-width: 0;
+    }
+
+    .phd-upload-eyebrow {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #667085;
+    }
+
+    .phd-upload-title {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #172033;
+    }
+
+    .phd-upload-subtitle {
+      margin: 8px 0 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #667085;
+    }
+
+    .phd-upload-close {
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e6e8ee;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #667085;
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+    }
+
+    .phd-upload-close:hover:not(:disabled) {
+      background: #f6f7fb;
+      color: #1f2937;
+      border-color: #d9dce5;
+    }
+
+    .phd-upload-close:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .phd-upload-dropzone {
+      position: relative;
+      display: flex;
+      min-height: 170px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 28px;
+      box-sizing: border-box;
+      border: 1.5px dashed #cfd4df;
+      border-radius: 18px;
+      background: #fafbff;
+      text-align: center;
+      cursor: pointer;
+      transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.15s ease;
+    }
+
+    .phd-upload-dropzone:hover {
+      border-color: #8d9af8;
+      background: #f7f8ff;
+    }
+
+    .phd-upload-dropzone-active {
+      border-color: #667eea;
+      background: #f3f5ff;
+      transform: translateY(-1px);
+    }
+
+    .phd-upload-file-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .phd-upload-drop-icon {
+      width: 46px;
+      height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: #eef1ff;
+      color: #5968e8;
+      pointer-events: none;
+    }
+
+    .phd-upload-dropzone strong {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 650;
+      color: #27304a;
+      pointer-events: none;
+    }
+
+    .phd-upload-dropzone > span {
+      font-size: 13px;
+      line-height: 1.4;
+      color: #8a93a5;
+      pointer-events: none;
+    }
+
+    .phd-upload-fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .phd-upload-field {
+      min-width: 0;
+    }
+
+    .phd-upload-field-wide {
+      grid-column: 1 / -1;
+    }
+
+    .phd-upload-field-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 650;
+      color: #344054;
+    }
+
+    .phd-upload-field-label span {
+      font-weight: 500;
+      color: #98a2b3;
+      text-align: right;
+    }
+
+    .phd-upload-input {
+      display: block;
+      width: 100%;
+      min-height: 46px;
+      box-sizing: border-box;
+      padding: 11px 13px;
+      border: 1px solid #d7dbe4;
+      border-radius: 12px;
+      outline: none;
+      background: #ffffff;
+      color: #1f2937;
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.4;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .phd-upload-input::placeholder {
+      color: #a0a8b7;
+    }
+
+    .phd-upload-input:focus {
+      border-color: #7b88f0;
+      box-shadow: 0 0 0 4px rgba(102, 124, 255, 0.11);
+    }
+
+    .phd-upload-input:disabled {
+      background: #f7f8fa;
+      color: #98a2b3;
+      cursor: not-allowed;
+    }
+
+    .phd-upload-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 11px 13px;
+      border: 1px solid #f1c7c7;
+      border-radius: 12px;
+      background: #fff7f7;
+      color: #b42318;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .phd-upload-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid #edf0f4;
+    }
+
+    .phd-upload-footer-note {
+      max-width: 340px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #8a93a5;
+    }
+
+    .phd-upload-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .phd-upload-button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease;
+    }
+
+    .phd-upload-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .phd-upload-secondary {
+      border: 1px solid #d9dde7;
+      background: #ffffff;
+      color: #475467;
+    }
+
+    .phd-upload-secondary:hover:not(:disabled) {
+      background: #f8f9fb;
+      border-color: #c8cdd8;
+    }
+
+    .phd-upload-primary {
+      border: 1px solid #667cff;
+      background: #667cff;
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(102, 124, 255, 0.18);
+    }
+
+    .phd-upload-primary:hover:not(:disabled) {
+      background: #5b6ff0;
+      border-color: #5b6ff0;
+      box-shadow: 0 10px 22px rgba(102, 124, 255, 0.22);
+    }
+
+    .phd-upload-button:disabled {
+      opacity: 0.52;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .phd-upload-spin {
+      animation: phd-upload-spin 0.9s linear infinite;
+    }
+
+    @keyframes phd-upload-spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .phd-upload-overlay {
+        padding: 12px;
+        align-items: flex-start;
+      }
+
+      .phd-upload-modal {
+        max-height: calc(100vh - 24px);
+        padding: 20px;
+        border-radius: 20px;
+      }
+
+      .phd-upload-title {
+        font-size: 22px;
+      }
+
+      .phd-upload-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .phd-upload-field-wide {
+        grid-column: auto;
+      }
+
+      .phd-upload-footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .phd-upload-footer-note {
+        max-width: none;
+      }
+
+      .phd-upload-actions {
+        width: 100%;
+      }
+
+      .phd-upload-button {
+        flex: 1;
+      }
+    }
+  `;
+
   return (
-    <div
-      className="upload-modal-overlay"
-      onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
-          onClose();
-        }
-      }}
-    >
-      <div className="upload-modal">
-        <div className="upload-modal-header">
-          <div>
-            <span className="eyebrow">
-              Research library
-            </span>
+    <>
+      <style>{modalStyles}</style>
 
-            <h3>
-              Upload a research paper
-            </h3>
+      <div
+        className="phd-upload-overlay"
+        onMouseDown={(event) => {
+          if (
+            event.target ===
+            event.currentTarget
+          ) {
+            onClose();
+          }
+        }}
+      >
+        <div className="phd-upload-modal">
+          <div className="phd-upload-header">
+            <div className="phd-upload-header-copy">
+              <span className="phd-upload-eyebrow">
+                Research library
+              </span>
 
-            <p>
-              Add a PDF to your permanent
-              PhD paper library.
-            </p>
-          </div>
+              <h3 className="phd-upload-title">
+                Upload a research paper
+              </h3>
 
-          <button
-            className="icon-button"
-            onClick={onClose}
-            disabled={uploading}
-            title="Close"
-          >
-            <X size={18} />
-          </button>
-        </div>
+              <p className="phd-upload-subtitle">
+                Add a PDF to your permanent
+                PhD paper library.
+              </p>
+            </div>
 
-        <form
-          onSubmit={handleSubmit}
-        >
-          <label
-            className={`upload-drop-zone ${
-              dragActive
-                ? "active"
-                : ""
-            }`}
-            onDragOver={(event) => {
-              event.preventDefault();
-              setDragActive(true);
-            }}
-            onDragLeave={() =>
-              setDragActive(false)
-            }
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              accept=".pdf,application/pdf"
-              onChange={
-                handleFileChange
-              }
+            <button
+              type="button"
+              className="phd-upload-close"
+              onClick={onClose}
               disabled={uploading}
-            />
-
-            <div className="upload-drop-icon">
-              <Upload size={22} />
-            </div>
-
-            <strong>
-              {file
-                ? file.name
-                : "Choose a PDF or drag it here"}
-            </strong>
-
-            <span>
-              PDF files only
-            </span>
-          </label>
-
-          <div className="upload-fields">
-            <div className="upload-field upload-field-wide">
-              <label>
-                Title
-                <span>
-                  optional — extracted
-                  automatically
-                </span>
-              </label>
-
-              <input
-                value={title}
-                onChange={(event) =>
-                  setTitle(
-                    event.target.value
-                  )
-                }
-                placeholder="Paper title"
-                disabled={uploading}
-              />
-            </div>
-
-            <div className="upload-field">
-              <label>
-                Authors
-                <span>optional</span>
-              </label>
-
-              <input
-                value={authors}
-                onChange={(event) =>
-                  setAuthors(
-                    event.target.value
-                  )
-                }
-                placeholder="Author names"
-                disabled={uploading}
-              />
-            </div>
-
-            <div className="upload-field">
-              <label>
-                Year
-                <span>optional</span>
-              </label>
-
-              <input
-                type="number"
-                min="1900"
-                max="2100"
-                value={year}
-                onChange={(event) =>
-                  setYear(
-                    event.target.value
-                  )
-                }
-                placeholder="2026"
-                disabled={uploading}
-              />
-            </div>
-
-            <div className="upload-field upload-field-wide">
-              <label>
-                Journal / Conference
-                <span>
-                  optional
-                </span>
-              </label>
-
-              <input
-                value={journal}
-                onChange={(event) =>
-                  setJournal(
-                    event.target.value
-                  )
-                }
-                placeholder="Journal or conference name"
-                disabled={uploading}
-              />
-            </div>
+              title="Close"
+              aria-label="Close upload dialog"
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          {error && (
-            <div className="upload-error">
-              <X size={15} />
-              {error}
-            </div>
-          )}
-
-          <div className="upload-modal-footer">
-            <span>
-              Metadata can be extracted
-              from the PDF automatically.
-            </span>
-
-            <div className="upload-modal-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={onClose}
+          <form onSubmit={handleSubmit}>
+            <label
+              className={`phd-upload-dropzone ${
+                dragActive
+                  ? "phd-upload-dropzone-active"
+                  : ""
+              }`}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setDragActive(true);
+              }}
+              onDragLeave={() =>
+                setDragActive(false)
+              }
+              onDrop={handleDrop}
+            >
+              <input
+                className="phd-upload-file-input"
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
                 disabled={uploading}
-              >
-                Cancel
-              </button>
+              />
 
-              <button
-                type="submit"
-                className="primary-button"
-                disabled={
-                  uploading ||
-                  !file
-                }
-              >
-                {uploading ? (
-                  <>
-                    <LoaderCircle
-                      size={16}
-                      className="spin"
-                    />
-                    Processing PDF...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} />
-                    Add to Library
-                  </>
-                )}
-              </button>
+              <div className="phd-upload-drop-icon">
+                <Upload size={22} />
+              </div>
+
+              <strong>
+                {file
+                  ? file.name
+                  : "Choose a PDF or drag it here"}
+              </strong>
+
+              <span>
+                PDF files only
+              </span>
+            </label>
+
+            <div className="phd-upload-fields">
+              <div className="phd-upload-field phd-upload-field-wide">
+                <label className="phd-upload-field-label">
+                  <span
+                    style={{
+                      color: "#344054",
+                      fontWeight: 650,
+                    }}
+                  >
+                    Title
+                  </span>
+
+                  <span>
+                    optional — extracted
+                    automatically
+                  </span>
+                </label>
+
+                <input
+                  className="phd-upload-input"
+                  value={title}
+                  onChange={(event) =>
+                    setTitle(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Paper title"
+                  disabled={uploading}
+                />
+              </div>
+
+              <div className="phd-upload-field">
+                <label className="phd-upload-field-label">
+                  <span
+                    style={{
+                      color: "#344054",
+                      fontWeight: 650,
+                    }}
+                  >
+                    Authors
+                  </span>
+
+                  <span>optional</span>
+                </label>
+
+                <input
+                  className="phd-upload-input"
+                  value={authors}
+                  onChange={(event) =>
+                    setAuthors(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Author names"
+                  disabled={uploading}
+                />
+              </div>
+
+              <div className="phd-upload-field">
+                <label className="phd-upload-field-label">
+                  <span
+                    style={{
+                      color: "#344054",
+                      fontWeight: 650,
+                    }}
+                  >
+                    Year
+                  </span>
+
+                  <span>optional</span>
+                </label>
+
+                <input
+                  className="phd-upload-input"
+                  type="number"
+                  min="1900"
+                  max="2100"
+                  value={year}
+                  onChange={(event) =>
+                    setYear(
+                      event.target.value
+                    )
+                  }
+                  placeholder="2026"
+                  disabled={uploading}
+                />
+              </div>
+
+              <div className="phd-upload-field phd-upload-field-wide">
+                <label className="phd-upload-field-label">
+                  <span
+                    style={{
+                      color: "#344054",
+                      fontWeight: 650,
+                    }}
+                  >
+                    Journal / Conference
+                  </span>
+
+                  <span>optional</span>
+                </label>
+
+                <input
+                  className="phd-upload-input"
+                  value={journal}
+                  onChange={(event) =>
+                    setJournal(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Journal or conference name"
+                  disabled={uploading}
+                />
+              </div>
             </div>
-          </div>
-        </form>
+
+            {error && (
+              <div className="phd-upload-error">
+                <X size={15} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="phd-upload-footer">
+              <span className="phd-upload-footer-note">
+                Metadata can be extracted
+                from the PDF automatically.
+              </span>
+
+              <div className="phd-upload-actions">
+                <button
+                  type="button"
+                  className="phd-upload-button phd-upload-secondary"
+                  onClick={onClose}
+                  disabled={uploading}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="phd-upload-button phd-upload-primary"
+                  disabled={
+                    uploading ||
+                    !file
+                  }
+                >
+                  {uploading ? (
+                    <>
+                      <LoaderCircle
+                        size={16}
+                        className="phd-upload-spin"
+                      />
+                      Processing PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={16} />
+                      Add to Library
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -8854,4 +9286,4 @@ function ThesisPage() {
    IMPORTANT: THIS MUST APPEAR ONLY ONCE.
 ========================================================= */
 
-export default App;
+export default App; 
