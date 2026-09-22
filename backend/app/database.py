@@ -1,34 +1,39 @@
 import os
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-# ============================================================
-# DATABASE LOCATION
-# ============================================================
-
-if os.getenv("VERCEL"):
-    DATABASE_URL = "sqlite:////tmp/phd_companion.db"
-else:
-    DATABASE_URL = "sqlite:///../phd_companion.db"
+load_dotenv()
 
 
-# ============================================================
-# DATABASE ENGINE
-# ============================================================
+# =========================================================
+# DATABASE
+# =========================================================
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
-        "check_same_thread": False,
-    },
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///../phd_companion.db",
 )
 
 
-# ============================================================
-# SESSION
-# ============================================================
+# Supabase uses PostgreSQL.
+# SQLite needs the check_same_thread option,
+# PostgreSQL does not.
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={
+            "check_same_thread": False,
+        },
+    )
+else:
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+    )
+
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -37,21 +42,14 @@ SessionLocal = sessionmaker(
 )
 
 
-# ============================================================
-# BASE MODEL
-# ============================================================
-
 Base = declarative_base()
 
-
-# ============================================================
-# DATABASE DEPENDENCY
-# ============================================================
 
 def get_db():
     db = SessionLocal()
 
     try:
         yield db
+
     finally:
         db.close() 

@@ -1965,7 +1965,7 @@ async def upload_paper(
         filename,
     )
 
-            stored_filename = (
+    stored_filename = (
         f"{timestamp}_{safe_filename}"
     )
 
@@ -2180,14 +2180,14 @@ async def upload_paper(
 
     except Exception as exc:
 
-    db.rollback()
+        db.rollback()
 
-    try:
-        delete_pdf_from_storage(
-            locals().get("file_url")
-        )
-    except Exception:
-        pass 
+        try:
+            delete_pdf_from_storage(
+                 locals().get("file_url")
+           )
+        except Exception:
+            pass 
 
         raise HTTPException(
             status_code=500,
