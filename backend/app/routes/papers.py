@@ -22,6 +22,7 @@ from ..database import get_db
 from ..models import Paper, PaperSection
 from ..schemas import (
     PaperCreate,
+    PaperListResponse,
     PaperNotesUpdate,
     PaperResponse,
     PaperTrackerUpdate,
@@ -1686,7 +1687,7 @@ def save_sections(
 
 @router.get(
     "/",
-    response_model=list[PaperResponse],
+    response_model=list[PaperListResponse],
 )
 def get_papers(
     db: Session = Depends(get_db),
@@ -1694,11 +1695,6 @@ def get_papers(
 
     papers = (
         db.query(Paper)
-        .options(
-            joinedload(
-                Paper.sections
-            )
-        )
         .order_by(
             Paper.created_at.desc()
         )
