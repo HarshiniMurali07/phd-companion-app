@@ -2305,8 +2305,6 @@ const [connectionModalOpen, setConnectionModalOpen] =
         const [
   paperResponse,
   sectionsResponse,
-  connectionsResponse,
-  papersResponse,
 ] = await Promise.all([
   fetch(
     `${API_BASE_URL}/api/papers/${paperId}`
@@ -2315,23 +2313,33 @@ const [connectionModalOpen, setConnectionModalOpen] =
   fetch(
     `${API_BASE_URL}/api/papers/${paperId}/sections`
   ),
-
-  fetch(
-    `${API_BASE_URL}/api/connections/paper/${paperId}`
-  ),
 ]);
 
-        if (!paperResponse.ok) {
-          throw new Error(
-            `Could not load paper (${paperResponse.status}).`
-          );
-        }
+if (!paperResponse.ok) {
+  throw new Error(
+    `Could not load paper (${paperResponse.status}).`
+  );
+}
 
-        if (!sectionsResponse.ok) {
-          throw new Error(
-            `Could not load paper sections (${sectionsResponse.status}).`
-          );
-        }
+if (!sectionsResponse.ok) {
+  throw new Error(
+    `Could not load paper sections (${sectionsResponse.status}).`
+  );
+}
+
+const paperData =
+  await paperResponse.json();
+
+const sectionsData =
+  await sectionsResponse.json();
+
+setPaper(paperData);
+
+setSections(
+  Array.isArray(sectionsData)
+    ? sectionsData
+    : []
+);
 
 
 const sectionsData =
