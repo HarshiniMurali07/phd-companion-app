@@ -2297,80 +2297,100 @@ const [connectionModalOpen, setConnectionModalOpen] =
     useState([]);
 
   useEffect(() => {
-    async function loadPaper() {
-      try {
-        setLoading(true);
-        setError("");
+  async function loadPaper() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const [
-  paperResponse,
-  sectionsResponse,
-] = await Promise.all([
-  fetch(
-    `${API_BASE_URL}/api/papers/${paperId}`
-  ),
+      const [
+        paperResponse,
+        sectionsResponse,
+        connectionsResponse,
+        papersResponse,
+      ] = await Promise.all([
+        fetch(
+          `${API_BASE_URL}/api/papers/${paperId}`
+        ),
+        fetch(
+          `${API_BASE_URL}/api/papers/${paperId}/sections`
+        ),
+        fetch(
+          `${API_BASE_URL}/api/connections/paper/${paperId}`
+        ),
+        fetch(
+          `${API_BASE_URL}/api/papers/`
+        ),
+      ]);
 
-  fetch(
-    `${API_BASE_URL}/api/papers/${paperId}/sections`
-  ),
-]);
-
-if (!paperResponse.ok) {
-  throw new Error(
-    `Could not load paper (${paperResponse.status}).`
-  );
-}
-
-if (!sectionsResponse.ok) {
-  throw new Error(
-    `Could not load paper sections (${sectionsResponse.status}).`
-  );
-}
-
-const paperData =
-  await paperResponse.json();
-
-const sectionsData =
-  await sectionsResponse.json();
-
-setPaper(paperData);
-
-setSections(
-  Array.isArray(sectionsData)
-    ? sectionsData
-    : []
-);
-
-
-const sectionsData =
-  await sectionsResponse.json();
-
-const connectionsData =
-  await connectionsResponse.json();
-
-const papersData =
-  await papersResponse.json();
-
-setPaper(paperData);
-
-setSections(
-  Array.isArray(sectionsData)
-    ? sectionsData
-    : []
-);
-
-setConnections(
-  Array.isArray(connectionsData)
-    ? connectionsData
-    : []
-);
-      } finally {
-        setLoading(false);
+      if (!paperResponse.ok) {
+        throw new Error(
+          `Could not load paper (${paperResponse.status}).`
+        );
       }
-    }
 
-    loadPaper();
-  }, [paperId]);
+      if (!sectionsResponse.ok) {
+        throw new Error(
+          `Could not load paper sections (${sectionsResponse.status}).`
+        );
+      }
+
+      if (!connectionsResponse.ok) {
+        throw new Error(
+          `Could not load paper connections (${connectionsResponse.status}).`
+        );
+      }
+
+      if (!papersResponse.ok) {
+        throw new Error(
+          `Could not load papers (${papersResponse.status}).`
+        );
+      }
+
+      const paperData =
+        await paperResponse.json();
+
+      const sectionsData =
+        await sectionsResponse.json();
+
+      const connectionsData =
+        await connectionsResponse.json();
+
+      const papersData =
+        await papersResponse.json();
+
+      setPaper(paperData);
+
+      setSections(
+        Array.isArray(sectionsData)
+          ? sectionsData
+          : []
+      );
+
+      setConnections(
+        Array.isArray(connectionsData)
+          ? connectionsData
+          : []
+      );
+
+      setAllPapers(
+        Array.isArray(papersData)
+          ? papersData
+          : []
+      );
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.message ||
+          "Could not load the selected paper."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadPaper();
+}, [paperId]);
 
   if (loading) {
     return (
