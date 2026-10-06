@@ -1718,17 +1718,12 @@ def get_paper(
 ):
 
     paper = (
-        db.query(Paper)
-        .options(
-            joinedload(
-                Paper.sections
-            )
-        )
-        .filter(
-            Paper.id == paper_id
-        )
-        .first()
+    db.query(Paper)
+    .filter(
+        Paper.id == paper_id
     )
+    .first()
+)
 
     if not paper:
 
