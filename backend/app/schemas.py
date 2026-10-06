@@ -17,7 +17,19 @@ class PaperSectionResponse(BaseModel):
         from_attributes=True
     )
 
+class PaperListResponse(BaseModel):
+    id: int
+    title: str
+    authors: str | None = None
+    year: int | None = None
+    journal: str | None = None
+    status: str = "To Read"
+    progress: int = 0
+    tags: str | None = None
 
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 # =========================================================
 # PAPER
 # =========================================================
