@@ -2319,10 +2319,6 @@ const [connectionModalOpen, setConnectionModalOpen] =
   fetch(
     `${API_BASE_URL}/api/connections/paper/${paperId}`
   ),
-
-  fetch(
-    `${API_BASE_URL}/api/papers/`
-  ),
 ]);
 
         if (!paperResponse.ok) {
@@ -2337,8 +2333,6 @@ const [connectionModalOpen, setConnectionModalOpen] =
           );
         }
 
-        const paperData =
-  await paperResponse.json();
 
 const sectionsData =
   await sectionsResponse.json();
@@ -2360,12 +2354,6 @@ setSections(
 setConnections(
   Array.isArray(connectionsData)
     ? connectionsData
-    : []
-);
-
-setAllPapers(
-  Array.isArray(papersData)
-    ? papersData
     : []
 );
       } finally {
