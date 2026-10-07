@@ -2405,11 +2405,22 @@ function PaperListItem({ paper }) {
         <strong>{paper.title}</strong>
 
         <span>
-          {paper.authors} · {paper.year}
+          {paper.authors || "Authors not available"} ·{" "}
+          {paper.year || "Year not available"}
         </span>
       </div>
 
-      <ArrowRight size={15} />
+      <div className="recent-item-meta">
+        <span className="paper-status">
+          {paper.status || "To Read"}
+        </span>
+
+        <span className="recent-progress">
+          {paper.progress ?? 0}%
+        </span>
+
+        <ArrowRight size={15} />
+      </div>
     </div>
   );
 }
