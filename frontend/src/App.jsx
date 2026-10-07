@@ -71,7 +71,7 @@ const navigation = [
     items: [
       { id: "learn", label: "Learn", icon: GraduationCap },
       { id: "review", label: "Review", icon: Brain },
-      { id: "audio", label: "Audio", icon: Headphones },
+      { id: "audio", label: "Progress & Reports", icon: Activity },
       { id: "viva", label: "Viva", icon: MessageSquare },
     ],
   },
