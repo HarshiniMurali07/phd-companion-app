@@ -9282,10 +9282,15 @@ function ProgressReportsPage() {
           </p>
         </div>
 
-        <button className="primary-button">
-          <FileText size={16} />
-          Generate progress report
-        </button>
+        <button
+  className="primary-button"
+  onClick={() => {
+    window.print();
+  }}
+>
+  <FileText size={16} />
+  Generate progress report
+</button>
       </section>
 
       <section className="hero-grid">
