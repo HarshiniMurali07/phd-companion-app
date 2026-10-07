@@ -9646,7 +9646,9 @@ function ManuscriptPage() {
       Results: 0,
       Discussion: 0,
     });
-
+  const [savedMessage, setSavedMessage] =
+  useState("");
+  
   function updateSectionStatus(status) {
     setSectionStatus((current) => ({
       ...current,
@@ -9660,6 +9662,15 @@ function ManuscriptPage() {
       [activeSection]: Number(progress),
     }));
   }
+  function handleSaveSection() {
+  setSavedMessage(
+    `${activeSection} saved successfully.`
+  );
+
+  setTimeout(() => {
+    setSavedMessage("");
+  }, 2500);
+}
 
   const totalProgress = Math.round(
     Object.values(sectionProgress).reduce(
@@ -9838,9 +9849,70 @@ function ManuscriptPage() {
         <div>
           <div className="section-heading">
             <div>
-              <span className="eyebrow">
-                Section editor
-              </span>
+              <div className="simple-card manuscript-editor-card">
+
+  <div className="manuscript-editor-header">
+    <div className="focus-icon">
+      <NotebookPen size={22} />
+    </div>
+
+    <div>
+      <h3>
+        {activeSection}
+      </h3>
+
+      <span>
+        {sectionStatus[activeSection]} ·{" "}
+        {sectionProgress[activeSection]}%
+      </span>
+    </div>
+  </div>
+
+  <textarea
+    className="manuscript-editor"
+    value={
+      sectionContent[activeSection]
+    }
+    onChange={(event) => {
+      setSectionContent((current) => ({
+        ...current,
+        [activeSection]:
+          event.target.value,
+      }));
+
+      setSavedMessage("");
+    }}
+    placeholder={
+      `Start writing your ${activeSection.toLowerCase()} section here...`
+    }
+  />
+
+  <div className="manuscript-editor-footer">
+
+    <span className="manuscript-editor-hint">
+      Your writing will stay attached to this
+      manuscript section.
+    </span>
+
+    <button
+      type="button"
+      className="primary-button"
+      onClick={handleSaveSection}
+    >
+      <Check size={16} />
+      Save section
+    </button>
+
+  </div>
+
+  {savedMessage && (
+    <div className="manuscript-save-message">
+      <Check size={15} />
+      {savedMessage}
+    </div>
+  )}
+
+</div>
 
               <h3>
                 {activeSection}
