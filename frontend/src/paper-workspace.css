@@ -8761,3 +8761,12 @@ a {
     padding: 18px;
   }
 }
+@media (max-width: 700px) {
+  .recent-item-meta {
+    gap: 6px;
+  }
+
+  .recent-item-meta .paper-status {
+    display: none;
+  }
+}
