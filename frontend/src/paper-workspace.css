@@ -8918,3 +8918,78 @@ a {
   margin: 4px 0 0;
   cursor: pointer;
 }
+
+/* =========================================================
+   MANUSCRIPT WRITING EDITOR
+========================================================= */
+
+.manuscript-editor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manuscript-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.manuscript-editor-header h3 {
+  margin: 0 0 4px;
+}
+
+.manuscript-editor-header span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.manuscript-editor {
+  width: 100%;
+  min-height: 280px;
+  resize: vertical;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+
+.manuscript-editor::placeholder {
+  color: var(--text-muted);
+}
+
+.manuscript-editor:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.manuscript-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.manuscript-editor-hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.manuscript-save-message {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
