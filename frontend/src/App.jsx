@@ -964,9 +964,59 @@ function PapersPage({ onOpenPaper }) {
     }
   }
 
-  useEffect(() => {
-    loadPapers();
-  }, []);
+  async function handleDeletePaper(paper) {
+  const confirmed = window.confirm(
+    `Delete "${paper.title}"?\n\nThis will permanently delete the paper and its stored PDF.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setError("");
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/papers/${paper.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    let data = null;
+
+    try {
+      data = await response.json();
+    } catch {
+      // No JSON response.
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data?.detail ||
+          `Could not delete the paper (${response.status}).`
+      );
+    }
+
+    setPapers((currentPapers) =>
+      currentPapers.filter(
+        (currentPaper) =>
+          String(currentPaper.id) !== String(paper.id)
+      )
+    );
+  } catch (err) {
+    console.error(err);
+
+    setError(
+      err.message ||
+        "Could not delete the paper."
+    );
+  }
+}
+
+useEffect(() => {
+  loadPapers();
+}, []);
 
   async function handleUploadComplete() {
     setUploadOpen(false);
