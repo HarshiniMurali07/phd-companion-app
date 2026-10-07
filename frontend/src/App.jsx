@@ -9646,9 +9646,20 @@ function ManuscriptPage() {
       Results: 0,
       Discussion: 0,
     });
+
+  const [sectionContent, setSectionContent] =
+    useState({
+      Introduction: "",
+      "Related Work": "",
+      Methodology: "",
+      Experiments: "",
+      Results: "",
+      Discussion: "",
+    });
+
   const [savedMessage, setSavedMessage] =
-  useState("");
-  
+    useState("");
+
   function updateSectionStatus(status) {
     setSectionStatus((current) => ({
       ...current,
@@ -9662,15 +9673,16 @@ function ManuscriptPage() {
       [activeSection]: Number(progress),
     }));
   }
-  function handleSaveSection() {
-  setSavedMessage(
-    `${activeSection} saved successfully.`
-  );
 
-  setTimeout(() => {
-    setSavedMessage("");
-  }, 2500);
-}
+  function handleSaveSection() {
+    setSavedMessage(
+      `${activeSection} saved successfully.`
+    );
+
+    setTimeout(() => {
+      setSavedMessage("");
+    }, 2500);
+  }
 
   const totalProgress = Math.round(
     Object.values(sectionProgress).reduce(
@@ -9681,6 +9693,7 @@ function ManuscriptPage() {
 
   return (
     <div className="page">
+
       <section className="page-header-row">
         <div>
           <span className="eyebrow">
@@ -9698,7 +9711,9 @@ function ManuscriptPage() {
         <button
           className="primary-button"
           onClick={() =>
-            alert("Manuscript creation will be added next.")
+            alert(
+              "Manuscript creation will be added next."
+            )
           }
         >
           <Plus size={16} />
@@ -9707,7 +9722,9 @@ function ManuscriptPage() {
       </section>
 
       <section className="hero-grid">
+
         <div className="focus-card">
+
           <div className="focus-card-header">
             <div>
               <span className="card-label">
@@ -9731,6 +9748,7 @@ function ManuscriptPage() {
           </p>
 
           <div className="focus-meta">
+
             <span>
               <FileText size={15} />
               Journal manuscript
@@ -9745,10 +9763,13 @@ function ManuscriptPage() {
               <Activity size={15} />
               {totalProgress}% complete
             </span>
+
           </div>
 
           <div className="focus-bottom">
+
             <div className="progress-section">
+
               <div className="progress-header">
                 <span>
                   Manuscript completion
@@ -9766,11 +9787,15 @@ function ManuscriptPage() {
                   }}
                 />
               </div>
+
             </div>
+
           </div>
+
         </div>
 
         <div className="stats-card">
+
           <div className="stats-header">
             <span className="card-label">
               Active section
@@ -9793,10 +9818,13 @@ function ManuscriptPage() {
               {sectionStatus[activeSection]}
             </span>
           </div>
+
         </div>
+
       </section>
 
       <section className="section-heading">
+
         <div>
           <span className="eyebrow">
             Manuscript structure
@@ -9806,10 +9834,13 @@ function ManuscriptPage() {
             Writing sections
           </h3>
         </div>
+
       </section>
 
       <section className="writing-board">
+
         {sections.map((section, index) => {
+
           const active =
             section === activeSection;
 
@@ -9824,6 +9855,7 @@ function ManuscriptPage() {
                 setActiveSection(section)
               }
             >
+
               <div className="writing-section-number">
                 {index + 1}
               </div>
@@ -9840,118 +9872,107 @@ function ManuscriptPage() {
               </div>
 
               <ArrowRight size={15} />
+
             </button>
           );
+
         })}
+
       </section>
 
       <section className="dashboard-columns">
+
         <div>
+
           <div className="section-heading">
+
             <div>
-              <div className="simple-card manuscript-editor-card">
-
-  <div className="manuscript-editor-header">
-    <div className="focus-icon">
-      <NotebookPen size={22} />
-    </div>
-
-    <div>
-      <h3>
-        {activeSection}
-      </h3>
-
-      <span>
-        {sectionStatus[activeSection]} ·{" "}
-        {sectionProgress[activeSection]}%
-      </span>
-    </div>
-  </div>
-
-  <textarea
-    className="manuscript-editor"
-    value={
-      sectionContent[activeSection]
-    }
-    onChange={(event) => {
-      setSectionContent((current) => ({
-        ...current,
-        [activeSection]:
-          event.target.value,
-      }));
-
-      setSavedMessage("");
-    }}
-    placeholder={
-      `Start writing your ${activeSection.toLowerCase()} section here...`
-    }
-  />
-
-  <div className="manuscript-editor-footer">
-
-    <span className="manuscript-editor-hint">
-      Your writing will stay attached to this
-      manuscript section.
-    </span>
-
-    <button
-      type="button"
-      className="primary-button"
-      onClick={handleSaveSection}
-    >
-      <Check size={16} />
-      Save section
-    </button>
-
-  </div>
-
-  {savedMessage && (
-    <div className="manuscript-save-message">
-      <Check size={15} />
-      {savedMessage}
-    </div>
-  )}
-
-</div>
+              <span className="eyebrow">
+                Section editor
+              </span>
 
               <h3>
                 {activeSection}
               </h3>
             </div>
+
           </div>
 
-          <div className="simple-card">
-            <div className="focus-icon">
-              <NotebookPen size={22} />
+          <div className="simple-card manuscript-editor-card">
+
+            <div className="manuscript-editor-header">
+
+              <div className="focus-icon">
+                <NotebookPen size={22} />
+              </div>
+
+              <div>
+                <h3>
+                  {activeSection}
+                </h3>
+
+                <span>
+                  {sectionStatus[activeSection]} ·{" "}
+                  {sectionProgress[activeSection]}%
+                </span>
+              </div>
+
             </div>
 
-            <h3>
-              {activeSection}
-            </h3>
+            <textarea
+              className="manuscript-editor"
+              value={
+                sectionContent[activeSection]
+              }
+              onChange={(event) => {
 
-            <p>
-              This section will become your working
-              academic draft. We will add the full
-              editor and database saving in the next
-              Manuscript step.
-            </p>
+                setSectionContent((current) => ({
+                  ...current,
+                  [activeSection]:
+                    event.target.value,
+                }));
 
-            <div className="focus-meta">
-              <span>
-                <Activity size={15} />
-                {sectionProgress[activeSection]}%
+                setSavedMessage("");
+
+              }}
+              placeholder={
+                `Start writing your ${activeSection.toLowerCase()} section here...`
+              }
+            />
+
+            <div className="manuscript-editor-footer">
+
+              <span className="manuscript-editor-hint">
+                Your writing will stay attached to this
+                manuscript section.
               </span>
 
-              <span>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleSaveSection}
+              >
+                <Check size={16} />
+                Save section
+              </button>
+
+            </div>
+
+            {savedMessage && (
+              <div className="manuscript-save-message">
                 <Check size={15} />
-                {sectionStatus[activeSection]}
-              </span>
-            </div>
+                {savedMessage}
+              </div>
+            )}
+
           </div>
+
         </div>
 
         <div>
+
           <div className="section-heading">
+
             <div>
               <span className="eyebrow">
                 Section controls
@@ -9961,69 +9982,84 @@ function ManuscriptPage() {
                 Update progress
               </h3>
             </div>
+
           </div>
 
           <div className="simple-card manuscript-controls-card">
 
-  <div className="manuscript-control-group">
-    <label>
-      Section status
-    </label>
+            <div className="manuscript-control-group">
 
-    <select
-      value={sectionStatus[activeSection]}
-      onChange={(event) =>
-        updateSectionStatus(
-          event.target.value
-        )
-      }
-    >
-      <option>
-        Not started
-      </option>
+              <label>
+                Section status
+              </label>
 
-      <option>
-        Drafting
-      </option>
+              <select
+                value={
+                  sectionStatus[activeSection]
+                }
+                onChange={(event) =>
+                  updateSectionStatus(
+                    event.target.value
+                  )
+                }
+              >
+                <option>
+                  Not started
+                </option>
 
-      <option>
-        In review
-      </option>
+                <option>
+                  Drafting
+                </option>
 
-      <option>
-        Completed
-      </option>
-    </select>
-  </div>
+                <option>
+                  In review
+                </option>
 
-  <div className="manuscript-control-group">
-    <div className="manuscript-control-header">
-      <label>
-        Section progress
-      </label>
+                <option>
+                  Completed
+                </option>
 
-      <strong>
-        {sectionProgress[activeSection]}%
-      </strong>
-    </div>
+              </select>
 
-    <input
-      type="range"
-      min="0"
-      max="100"
-      step="5"
-      value={sectionProgress[activeSection]}
-      onChange={(event) =>
-        updateSectionProgress(
-          event.target.value
-        )
-      }
-    />
-  </div>
+            </div>
 
-</div>
+            <div className="manuscript-control-group">
+
+              <div className="manuscript-control-header">
+
+                <label>
+                  Section progress
+                </label>
+
+                <strong>
+                  {sectionProgress[activeSection]}%
+                </strong>
+
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={
+                  sectionProgress[activeSection]
+                }
+                onChange={(event) =>
+                  updateSectionProgress(
+                    event.target.value
+                  )
+                }
+              />
+
+            </div>
+
+          </div>
+
         </div>
+
       </section>
+
     </div>
   );
 }
