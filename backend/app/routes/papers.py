@@ -2733,22 +2733,9 @@ def delete_paper(
 
     db.commit()
 
-    # Delete stored PDF.
+        # Delete stored PDF from Supabase Storage.
     if file_path:
-
-        try:
-
-            path = Path(
-                file_path
-            )
-
-            if path.exists():
-
-                path.unlink()
-
-        except OSError:
-
-            pass
+        delete_pdf_from_storage(file_path)
 
     return {
         "message":
