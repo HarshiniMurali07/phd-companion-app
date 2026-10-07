@@ -1321,15 +1321,44 @@ useEffect(() => {
                   }
                 >
                   <div className="paper-card-top">
-                    <div className="paper-card-icon">
-                      <FileText size={21} />
-                    </div>
+  <div className="paper-card-icon">
+    <FileText size={21} />
+  </div>
 
-                    <span className="paper-status">
-                      {paper.status ||
-                        "To Read"}
-                    </span>
-                  </div>
+  <div
+    className="paper-card-actions"
+    onClick={(event) => {
+      event.stopPropagation();
+    }}
+  >
+    <span className="paper-status">
+      {paper.status || "To Read"}
+    </span>
+
+    <span
+      className="paper-delete-button"
+      role="button"
+      tabIndex={0}
+      title="Delete paper"
+      onClick={(event) => {
+        event.stopPropagation();
+        handleDeletePaper(paper);
+      }}
+      onKeyDown={(event) => {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          handleDeletePaper(paper);
+        }
+      }}
+    >
+      ×
+    </span>
+  </div>
+</div>
 
                   <h3>{paper.title}</h3>
 
