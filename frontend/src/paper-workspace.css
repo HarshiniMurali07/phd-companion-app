@@ -8858,3 +8858,63 @@ a {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   MANUSCRIPT SECTION CONTROLS
+========================================================= */
+
+.manuscript-controls-card {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.manuscript-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manuscript-control-group label {
+  display: block;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.manuscript-control-group select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.manuscript-control-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.manuscript-control-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manuscript-control-header strong {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.manuscript-control-group input[type="range"] {
+  width: 100%;
+  margin: 4px 0 0;
+  cursor: pointer;
+}
