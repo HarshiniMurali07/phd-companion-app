@@ -963,35 +963,37 @@ function TodayPage({ navigate }) {
 
       <div className="dashboard-columns">
         <section>
-          <div className="section-heading compact">
-            <div>
-              <span className="eyebrow">
-                Library
-              </span>
+  <div className="section-heading compact">
+    <div>
+      <span className="eyebrow">
+        Research activity
+      </span>
 
-              <h3>Recently opened</h3>
-            </div>
+      <h3>
+        Recent research activity
+      </h3>
+    </div>
 
-            <button
-              className="ghost-button"
-              onClick={() =>
-                navigate("papers")
-              }
-            >
-              Papers{" "}
-              <ArrowRight size={15} />
-            </button>
-          </div>
+    <button
+      className="ghost-button"
+      onClick={() =>
+        navigate("papers")
+      }
+    >
+      Open library{" "}
+      <ArrowRight size={15} />
+    </button>
+  </div>
 
-          <div className="recent-list">
-            {fallbackPapers.map((paper) => (
-              <PaperListItem
-                paper={paper}
-                key={paper.id}
-              />
-            ))}
-          </div>
-        </section>
+  <div className="recent-list">
+    {fallbackPapers.slice(0, 3).map((paper) => (
+      <PaperListItem
+        paper={paper}
+        key={paper.id}
+      />
+    ))}
+  </div>
+</section>
 
         <section>
           <div className="section-heading compact">
