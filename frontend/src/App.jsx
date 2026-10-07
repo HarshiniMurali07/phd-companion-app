@@ -309,7 +309,7 @@ function App() {
           )}
 
           {activePage === "audio" && (
-            <AudioPage />
+            <ProgressReportspage />
           )}
 
           {activePage === "viva" && (
@@ -9264,64 +9264,285 @@ function ReviewPage() {
    AUDIO
 ========================================================= */
 
-function AudioPage() {
+function ProgressReportsPage() {
   return (
     <div className="page">
       <section className="page-header-row">
         <div>
           <span className="eyebrow">
-            Voice learning
+            PhD progress tracking
           </span>
 
-          <h2>Audio tutor</h2>
+          <h2>Progress & Reports</h2>
 
           <p className="welcome-subtitle">
-            Turn research concepts into spoken
-            learning sessions.
+            Turn your research activity into clear
+            progress evidence for reviews, supervision
+            meetings, and academic reporting.
           </p>
         </div>
 
         <button className="primary-button">
-          <Headphones size={16} />
-          Start audio session
+          <FileText size={16} />
+          Generate progress report
         </button>
       </section>
 
-      <section className="simple-card">
-        <div className="focus-icon">
-          <Headphones size={23} />
+      <section className="hero-grid">
+        <div className="focus-card">
+          <div className="focus-card-header">
+            <div>
+              <span className="card-label">
+                Overall PhD progress
+              </span>
+
+              <h3>
+                Your research foundation is growing
+              </h3>
+            </div>
+
+            <div className="focus-icon">
+              <Activity size={22} />
+            </div>
+          </div>
+
+          <p>
+            Track the development of your literature,
+            knowledge, research gaps, experiments,
+            writing, and thesis work from one place.
+          </p>
+
+          <div className="focus-meta">
+            <span>
+              <BookOpen size={15} />
+              13 papers
+            </span>
+
+            <span>
+              <Lightbulb size={15} />
+              3 research gaps
+            </span>
+
+            <span>
+              <FlaskConical size={15} />
+              5 experiments
+            </span>
+          </div>
+
+          <div className="focus-bottom">
+            <div className="progress-section">
+              <div className="progress-header">
+                <span>Current PhD progress</span>
+                <strong>18%</strong>
+              </div>
+
+              <div className="progress-track">
+                <span
+                  style={{
+                    width: "18%",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <h3>
-          Your research tutor
-        </h3>
+        <div className="stats-card">
+          <div className="stats-header">
+            <span className="card-label">
+              Reporting status
+            </span>
 
-        <p>
-          Ask questions, request explanations,
-          practise recall and discuss papers
-          using your voice.
-        </p>
-
-        <div className="audio-feature-grid">
-          <div>
-            <MessageSquare size={18} />
-            <strong>
-              Research discussion
-            </strong>
+            <CalendarDays size={19} />
           </div>
 
-          <div>
-            <Brain size={18} />
-            <strong>
-              Concept explanation
-            </strong>
+          <div className="weekly-number">
+            Year 1
           </div>
 
-          <div>
-            <Trophy size={18} />
-            <strong>
-              Viva practice
-            </strong>
+          <p>
+            Building research foundations
+          </p>
+
+          <div className="focus-meta">
+            <span>
+              <Clock3 size={15} />
+              Current phase
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-heading">
+        <div>
+          <span className="eyebrow">
+            Research evidence
+          </span>
+
+          <h3>Progress snapshot</h3>
+        </div>
+      </section>
+
+      <section className="learning-grid">
+        <div className="learning-card">
+          <div className="learning-card-icon">
+            <BookOpen size={19} />
+          </div>
+
+          <span className="card-label">
+            Literature
+          </span>
+
+          <h3>13 papers reviewed</h3>
+
+          <p>
+            Build a traceable record of the literature
+            supporting your research direction.
+          </p>
+        </div>
+
+        <div className="learning-card">
+          <div className="learning-card-icon">
+            <Lightbulb size={19} />
+          </div>
+
+          <span className="card-label">
+            Research gaps
+          </span>
+
+          <h3>3 gaps identified</h3>
+
+          <p>
+            Track open problems and connect them to
+            supporting evidence from the literature.
+          </p>
+        </div>
+
+        <div className="learning-card">
+          <div className="learning-card-icon">
+            <FlaskConical size={19} />
+          </div>
+
+          <span className="card-label">
+            Experiments
+          </span>
+
+          <h3>5 experiments tracked</h3>
+
+          <p>
+            Monitor planned, running, and completed
+            research experiments.
+          </p>
+        </div>
+
+        <div className="learning-card">
+          <div className="learning-card-icon">
+            <NotebookPen size={19} />
+          </div>
+
+          <span className="card-label">
+            Writing
+          </span>
+
+          <h3>Manuscript in progress</h3>
+
+          <p>
+            Turn your research evidence into structured
+            academic writing and future publications.
+          </p>
+        </div>
+      </section>
+
+      <section className="dashboard-columns">
+        <div>
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                Supervisor reporting
+              </span>
+
+              <h3>Report-ready evidence</h3>
+            </div>
+          </div>
+
+          <div className="simple-card">
+            <div className="focus-icon">
+              <FileText size={22} />
+            </div>
+
+            <h3>
+              Your research story
+            </h3>
+
+            <p>
+              Your progress report will eventually
+              combine literature activity, knowledge
+              gained, research gaps, experiments,
+              results, publications, and next actions.
+            </p>
+
+            <div className="focus-meta">
+              <span>
+                <Check size={15} />
+                Literature activity
+              </span>
+
+              <span>
+                <Check size={15} />
+                Research direction
+              </span>
+
+              <span>
+                <Check size={15} />
+                Experiment tracking
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                Next review
+              </span>
+
+              <h3>What to report next</h3>
+            </div>
+          </div>
+
+          <div className="simple-card">
+            <div className="focus-icon">
+              <Target size={22} />
+            </div>
+
+            <h3>
+              Strengthen your research evidence
+            </h3>
+
+            <p>
+              Continue reviewing papers, validating
+              research gaps, documenting experiments,
+              and converting findings into manuscript
+              material.
+            </p>
+
+            <div className="focus-meta">
+              <span>
+                <Target size={15} />
+                Literature → gaps
+              </span>
+
+              <span>
+                <Target size={15} />
+                Gaps → experiments
+              </span>
+
+              <span>
+                <Target size={15} />
+                Results → writing
+              </span>
+            </div>
           </div>
         </div>
       </section>
