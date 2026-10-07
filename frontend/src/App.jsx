@@ -350,7 +350,7 @@ function App() {
 {activePage === "thesis" && (
   <ThesisPage />
 )}
-          )}
+  
         </div>
       </main>
 
