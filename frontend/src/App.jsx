@@ -2400,45 +2400,6 @@ function PaperListItem({ paper }) {
       <div className="recent-icon">
         <FileText size={18} />
       </div>
-      .recent-item-meta {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.recent-progress {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-  white-space: nowrap;
-}
-
-.recent-item-meta .paper-status {
-  white-space: nowrap;
-}
-
-.recent-content {
-  min-width: 0;
-  flex: 1;
-}
-
-.recent-content strong {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.recent-content span {
-  display: block;
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
       <div className="recent-content">
         <strong>{paper.title}</strong>
 
