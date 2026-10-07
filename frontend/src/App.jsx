@@ -9891,63 +9891,65 @@ function ManuscriptPage() {
             </div>
           </div>
 
-          <div className="simple-card">
-            <label>
-              Status
-            </label>
+          <div className="simple-card manuscript-controls-card">
 
-            <select
-              value={sectionStatus[activeSection]}
-              onChange={(event) =>
-                updateSectionStatus(
-                  event.target.value
-                )
-              }
-            >
-              <option>
-                Not started
-              </option>
+  <div className="manuscript-control-group">
+    <label>
+      Section status
+    </label>
 
-              <option>
-                Drafting
-              </option>
+    <select
+      value={sectionStatus[activeSection]}
+      onChange={(event) =>
+        updateSectionStatus(
+          event.target.value
+        )
+      }
+    >
+      <option>
+        Not started
+      </option>
 
-              <option>
-                In review
-              </option>
+      <option>
+        Drafting
+      </option>
 
-              <option>
-                Completed
-              </option>
-            </select>
+      <option>
+        In review
+      </option>
 
-            <label>
-              Progress
-            </label>
+      <option>
+        Completed
+      </option>
+    </select>
+  </div>
 
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value={sectionProgress[activeSection]}
-              onChange={(event) =>
-                updateSectionProgress(
-                  event.target.value
-                )
-              }
-            />
+  <div className="manuscript-control-group">
+    <div className="manuscript-control-header">
+      <label>
+        Section progress
+      </label>
 
-            <div className="progress-header">
-              <span>
-                Section progress
-              </span>
+      <strong>
+        {sectionProgress[activeSection]}%
+      </strong>
+    </div>
 
-              <strong>
-                {sectionProgress[activeSection]}%
-              </strong>
-            </div>
-          </div>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      step="5"
+      value={sectionProgress[activeSection]}
+      onChange={(event) =>
+        updateSectionProgress(
+          event.target.value
+        )
+      }
+    />
+  </div>
+
+</div>
         </div>
       </section>
     </div>
