@@ -67,21 +67,50 @@ const navigation = [
     ],
   },
   {
-    section: "Learning",
-    items: [
-      { id: "learn", label: "Learn", icon: GraduationCap },
-      { id: "review", label: "Review", icon: Brain },
-      { id: "audio", label: "Progress & Reports", icon: Activity },
-      { id: "viva", label: "Viva", icon: MessageSquare },
-    ],
-  },
-  {
-    section: "Writing",
-    items: [
-      { id: "manuscript", label: "Manuscript", icon: NotebookPen },
-      { id: "thesis", label: "Thesis", icon: FileText },
-    ],
-  },
+  section: "Learning",
+  items: [
+    {
+      id: "learn",
+      label: "Learn",
+      icon: GraduationCap,
+    },
+    {
+      id: "research-log",
+      label: "Research Log",
+      icon: NotebookPen,
+    },
+    {
+      id: "audio",
+      label: "Progress & Reports",
+      icon: Activity,
+    },
+  ],
+},
+{
+  section: "Planning",
+  items: [
+    {
+      id: "research-planner",
+      label: "Research Planner",
+      icon: CalendarDays,
+    },
+  ],
+},
+{
+  section: "Writing",
+  items: [
+    {
+      id: "manuscript",
+      label: "Manuscript",
+      icon: NotebookPen,
+    },
+    {
+      id: "thesis",
+      label: "Thesis",
+      icon: FileText,
+    },
+  ],
+},
 ];
 
 /* =========================================================
@@ -300,28 +329,27 @@ function App() {
             <ExperimentsPage />
           )}
 
-          {activePage === "learn" && (
-            <LearnPage />
-          )}
+          {activePage === "learn" && <LearnPage />}
 
-          {activePage === "review" && (
-            <ReviewPage />
-          )}
+{activePage === "research-log" && (
+  <ResearchLogPage />
+)}
 
-          {activePage === "audio" && (
-            <ProgressReportsPage />
-          )}
+{activePage === "audio" && (
+  <ProgressReportsPage />
+)}
 
-          {activePage === "viva" && (
-            <VivaPage />
-          )}
+{activePage === "research-planner" && (
+  <ResearchPlannerPage />
+)}
 
-          {activePage === "manuscript" && (
-            <ManuscriptPage />
-          )}
+{activePage === "manuscript" && (
+  <ManuscriptPage />
+)}
 
-          {activePage === "thesis" && (
-            <ThesisPage />
+{activePage === "thesis" && (
+  <ThesisPage />
+)}
           )}
         </div>
       </main>
@@ -8962,300 +8990,410 @@ function LearningQuizModal({
    REVIEW
 ========================================================= */
 
-function ReviewPage() {
-  const [topics, setTopics] = useState([]);
-  const [quizItems, setQuizItems] = useState([]);
+/* =========================================================
+   RESEARCH LOG
+========================================================= */
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+function ResearchLogPage() {
+  const [entries, setEntries] = useState([
+    {
+      id: 1,
+      type: "Guide Meeting",
+      title: "Initial IndiaRetNet research discussion",
+      date: "07 Oct 2026",
+      description:
+        "Discussed the research direction, literature review strategy, research gaps and the next stage of IndiaRetNet development.",
+      status: "Completed",
+    },
+  ]);
 
-  const [activeQuiz, setActiveQuiz] = useState(null);
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [entryType, setEntryType] =
+    useState("Guide Meeting");
 
-  async function loadReviewData() {
-    try {
-      setLoading(true);
-      setError("");
+  const [title, setTitle] =
+    useState("");
 
-      const topicsResponse = await fetch(
-        `${API_BASE_URL}/api/learn/topics`
+  const [date, setDate] =
+    useState("");
+
+  const [description, setDescription] =
+    useState("");
+
+  const [status, setStatus] =
+    useState("Completed");
+
+  const [savedMessage, setSavedMessage] =
+    useState("");
+
+  const entryTypes = [
+    "Guide Meeting",
+    "Guide Instruction",
+    "Research Decision",
+    "Methodology Change",
+    "Literature Review",
+    "Experiment",
+    "Manuscript",
+    "Journal Submission",
+    "Reviewer Comment",
+    "Revision",
+    "Conference",
+    "Thesis",
+    "Collaborator Discussion",
+    "Idea",
+    "Issue",
+  ];
+
+  function handleAddEntry() {
+    if (!title.trim()) {
+      setSavedMessage(
+        "Please enter a title for the research log."
       );
-
-      if (!topicsResponse.ok) {
-        throw new Error(
-          `Could not load learning topics (${topicsResponse.status}).`
-        );
-      }
-
-      const topicData = await topicsResponse.json();
-
-      if (!Array.isArray(topicData)) {
-        setTopics([]);
-        setQuizItems([]);
-        return;
-      }
-
-      setTopics(topicData);
-
-      const topicDetails = await Promise.all(
-        topicData.map(async (topic) => {
-          const response = await fetch(
-            `${API_BASE_URL}/api/learn/topics/${topic.id}`
-          );
-
-          if (!response.ok) {
-            return null;
-          }
-
-          return response.json();
-        })
-      );
-
-      const allQuizzes = [];
-
-      topicDetails
-        .filter(Boolean)
-        .forEach((topic) => {
-          if (Array.isArray(topic.quizzes)) {
-            topic.quizzes.forEach((quiz) => {
-              allQuizzes.push({
-                ...quiz,
-                topic_title: topic.title,
-              });
-            });
-          }
-        });
-
-      setQuizItems(allQuizzes);
-    } catch (err) {
-      console.error(err);
-
-      setError(
-        err.message ||
-          "Could not load your review questions."
-      );
-    } finally {
-      setLoading(false);
+      return;
     }
-  }
 
-  useEffect(() => {
-    loadReviewData();
-  }, []);
+    const newEntry = {
+      id: Date.now(),
+      type: entryType,
+      title: title.trim(),
+      date:
+        date ||
+        new Date().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+      description:
+        description.trim() ||
+        "No additional notes added.",
+      status,
+    };
 
-  function startQuiz(quiz) {
-    setActiveQuiz(quiz);
-    setShowAnswer(false);
-  }
+    setEntries((current) => [
+      newEntry,
+      ...current,
+    ]);
 
-  function closeQuiz() {
-    setActiveQuiz(null);
-    setShowAnswer(false);
+    setTitle("");
+    setDate("");
+    setDescription("");
+    setStatus("Completed");
+
+    setSavedMessage(
+      "Research log entry added successfully."
+    );
+
+    setTimeout(() => {
+      setSavedMessage("");
+    }, 2500);
   }
 
   return (
     <div className="page">
+
       <section className="page-header-row">
         <div>
           <span className="eyebrow">
-            Spaced repetition
+            PhD research record
           </span>
 
-          <h2>Review</h2>
+          <h2>Research Log</h2>
 
           <p className="welcome-subtitle">
-            Test yourself using the questions
-            you created while learning.
+            Record guide meetings, research decisions,
+            methodology changes, submissions,
+            revisions, ideas and important research
+            events.
           </p>
         </div>
-
-        {quizItems.length > 0 && (
-          <button
-            className="primary-button"
-            onClick={() =>
-              startQuiz(quizItems[0])
-            }
-          >
-            <Play
-              size={16}
-              fill="currentColor"
-            />
-            Start review
-          </button>
-        )}
       </section>
 
-      {loading && (
-        <div className="inline-status">
-          <LoaderCircle
-            size={18}
-            className="spin"
-          />
+      <section className="hero-grid">
 
-          Loading your review questions...
-        </div>
-      )}
+        <div className="focus-card">
 
-      {error && (
-        <div className="soft-notice">
-          {error}
-        </div>
-      )}
+          <div className="focus-card-header">
 
-      {!loading &&
-        !error &&
-        quizItems.length === 0 && (
-          <div className="paper-library-empty">
-            <div className="paper-library-empty-icon">
-              <Brain size={25} />
-            </div>
-
-            <h3>
-              No review questions yet
-            </h3>
-
-            <p>
-              Create quiz questions inside
-              Learn and they will appear here
-              for review.
-            </p>
-          </div>
-        )}
-
-      {!loading && quizItems.length > 0 && (
-        <section className="review-list">
-          {quizItems.map((quiz) => (
-            <button
-              className="review-item"
-              key={quiz.id}
-              onClick={() =>
-                startQuiz(quiz)
-              }
-            >
-              <div className="review-icon">
-                <Brain size={18} />
-              </div>
-
-              <div>
-                <strong>
-                  {quiz.question}
-                </strong>
-
-                <span>
-                  {quiz.topic_title} ·{" "}
-                  {quiz.difficulty}
-                </span>
-              </div>
-
-              <ArrowRight size={16} />
-            </button>
-          ))}
-        </section>
-      )}
-
-      {activeQuiz && (
-        <div
-          className="learn-modal-backdrop"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              closeQuiz();
-            }
-          }}
-        >
-          <div className="learn-modal review-quiz-modal">
-            <div className="learn-modal-header">
-              <div>
-                <span className="eyebrow">
-                  {activeQuiz.topic_title}
-                </span>
-
-                <h3>
-                  Test yourself
-                </h3>
-              </div>
-
-              <button
-                className="small-icon-button"
-                onClick={closeQuiz}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="review-quiz-content">
-              <span className="review-quiz-difficulty">
-                {activeQuiz.difficulty}
+            <div>
+              <span className="card-label">
+                Research history
               </span>
 
-              <h4>
-                {activeQuiz.question}
-              </h4>
+              <h3>
+                Keep a traceable record of your PhD
+              </h3>
+            </div>
 
-              {!showAnswer ? (
-                <button
-                  className="primary-button"
-                  onClick={() =>
-                    setShowAnswer(true)
+            <div className="focus-icon">
+              <NotebookPen size={22} />
+            </div>
+
+          </div>
+
+          <p>
+            Use this log to remember what was discussed,
+            what your guide instructed, why research
+            decisions were made, and what changed over
+            time.
+          </p>
+
+          <div className="focus-meta">
+
+            <span>
+              <Users size={15} />
+              {entries.filter(
+                (entry) =>
+                  entry.type === "Guide Meeting"
+              ).length}{" "}
+              guide records
+            </span>
+
+            <span>
+              <Lightbulb size={15} />
+              {entries.filter(
+                (entry) =>
+                  entry.type === "Idea"
+              ).length}{" "}
+              ideas
+            </span>
+
+            <span>
+              <Check size={15} />
+              {entries.filter(
+                (entry) =>
+                  entry.status === "Completed"
+              ).length}{" "}
+              completed
+            </span>
+
+          </div>
+
+        </div>
+
+        <div className="stats-card">
+
+          <div className="stats-header">
+            <span className="card-label">
+              Total records
+            </span>
+
+            <NotebookPen size={19} />
+          </div>
+
+          <div className="weekly-number">
+            {entries.length}
+          </div>
+
+          <p>
+            Research events documented
+          </p>
+
+          <div className="focus-meta">
+            <span>
+              <Activity size={15} />
+              Continuously updated
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section className="dashboard-columns">
+
+        <div>
+
+          <div className="section-heading">
+
+            <div>
+              <span className="eyebrow">
+                New record
+              </span>
+
+              <h3>
+                Add research activity
+              </h3>
+            </div>
+
+          </div>
+
+          <div className="simple-card">
+
+            <div className="manuscript-controls-card">
+
+              <label>
+                Entry type
+
+                <select
+                  value={entryType}
+                  onChange={(event) =>
+                    setEntryType(
+                      event.target.value
+                    )
                   }
                 >
-                  <Check size={16} />
-                  Reveal answer
-                </button>
-              ) : (
-                <div className="review-answer-card">
-                  <span>
-                    Answer
-                  </span>
+                  {entryTypes.map((type) => (
+                    <option
+                      key={type}
+                      value={type}
+                    >
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                  <p>
-                    {activeQuiz.answer}
-                  </p>
-                </div>
-              )}
+              <label>
+                Title
+
+                <input
+                  value={title}
+                  onChange={(event) =>
+                    setTitle(
+                      event.target.value
+                    )
+                  }
+                  placeholder="e.g. Guide meeting — discussed research gaps"
+                />
+              </label>
+
+              <label>
+                Date
+
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(event) =>
+                    setDate(
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <label>
+                Status
+
+                <select
+                  value={status}
+                  onChange={(event) =>
+                    setStatus(
+                      event.target.value
+                    )
+                  }
+                >
+                  <option>
+                    Completed
+                  </option>
+
+                  <option>
+                    In progress
+                  </option>
+
+                  <option>
+                    Pending
+                  </option>
+
+                  <option>
+                    Needs follow-up
+                  </option>
+                </select>
+              </label>
+
             </div>
 
-            <div className="learn-modal-footer">
+            <textarea
+              className="manuscript-editor"
+              value={description}
+              onChange={(event) =>
+                setDescription(
+                  event.target.value
+                )
+              }
+              placeholder="Record what happened, what your guide said, what decision was made, what needs to happen next, or any important context..."
+            />
+
+            <div className="manuscript-editor-footer">
+
+              <span className="manuscript-editor-hint">
+                Keep this detailed enough to support
+                future progress reports and guide
+                meetings.
+              </span>
+
               <button
-                className="secondary-button"
-                onClick={closeQuiz}
+                type="button"
+                className="primary-button"
+                onClick={handleAddEntry}
               >
-                Close
+                <Plus size={16} />
+                Add to research log
               </button>
 
-              {showAnswer && (
-                <button
-                  className="primary-button"
-                  onClick={() => {
-                    const currentIndex =
-                      quizItems.findIndex(
-                        (quiz) =>
-                          quiz.id ===
-                          activeQuiz.id
-                      );
-
-                    const nextQuiz =
-                      quizItems[
-                        currentIndex + 1
-                      ];
-
-                    if (nextQuiz) {
-                      startQuiz(nextQuiz);
-                    } else {
-                      closeQuiz();
-                    }
-                  }}
-                >
-                  <ArrowRight size={15} />
-                  Next question
-                </button>
-              )}
             </div>
+
+            {savedMessage && (
+              <div className="manuscript-save-message">
+                <Check size={15} />
+                {savedMessage}
+              </div>
+            )}
+
           </div>
+
         </div>
-      )}
+
+      </section>
+
+      <section className="section-heading">
+
+        <div>
+          <span className="eyebrow">
+            Research history
+          </span>
+
+          <h3>
+            Recent research records
+          </h3>
+        </div>
+
+      </section>
+
+      <section className="review-list">
+
+        {entries.map((entry) => (
+
+          <div
+            className="review-item"
+            key={entry.id}
+          >
+
+            <div className="review-icon">
+              <NotebookPen size={18} />
+            </div>
+
+            <div>
+
+              <strong>
+                {entry.title}
+              </strong>
+
+              <span>
+                {entry.type} · {entry.date} ·{" "}
+                {entry.status}
+              </span>
+
+              <p>
+                {entry.description}
+              </p>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </section>
+
     </div>
   );
 }
@@ -9556,56 +9694,473 @@ function ProgressReportsPage() {
 }
 
 /* =========================================================
-   VIVA
+   RESEARCH PLANNER
 ========================================================= */
 
-function VivaPage() {
+function ResearchPlannerPage() {
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      category: "Literature",
+      title: "Review recent retinal foundation models",
+      deadline: "10 Oct 2026",
+      status: "In progress",
+      priority: "High",
+    },
+    {
+      id: 2,
+      category: "Research Gap",
+      title: "Consolidate identified research gaps",
+      deadline: "14 Oct 2026",
+      status: "Pending",
+      priority: "High",
+    },
+    {
+      id: 3,
+      category: "Guide Meeting",
+      title: "Prepare progress update for guide",
+      deadline: "16 Oct 2026",
+      status: "Pending",
+      priority: "Critical",
+    },
+  ]);
+
+  const [taskTitle, setTaskTitle] =
+    useState("");
+
+  const [category, setCategory] =
+    useState("Research");
+
+  const [deadline, setDeadline] =
+    useState("");
+
+  const [priority, setPriority] =
+    useState("Medium");
+
+  const [savedMessage, setSavedMessage] =
+    useState("");
+
+  const categories = [
+    "Research",
+    "Literature",
+    "Research Gap",
+    "Experiment",
+    "Analysis",
+    "Writing",
+    "Manuscript",
+    "Thesis",
+    "Guide Meeting",
+    "Submission",
+  ];
+
+  function addTask() {
+    if (!taskTitle.trim()) {
+      setSavedMessage(
+        "Please enter a task title."
+      );
+      return;
+    }
+
+    const newTask = {
+      id: Date.now(),
+      category,
+      title: taskTitle.trim(),
+      deadline:
+        deadline || "No deadline",
+      status: "Pending",
+      priority,
+    };
+
+    setTasks((current) => [
+      ...current,
+      newTask,
+    ]);
+
+    setTaskTitle("");
+    setDeadline("");
+    setPriority("Medium");
+
+    setSavedMessage(
+      "Task added to your research planner."
+    );
+
+    setTimeout(() => {
+      setSavedMessage("");
+    }, 2500);
+  }
+
+  function updateTaskStatus(id, status) {
+    setTasks((current) =>
+      current.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              status,
+            }
+          : task
+      )
+    );
+  }
+
+  const completedTasks =
+    tasks.filter(
+      (task) =>
+        task.status === "Completed"
+    ).length;
+
+  const activeTasks =
+    tasks.filter(
+      (task) =>
+        task.status !== "Completed"
+    ).length;
+
+  const criticalTasks =
+    tasks.filter(
+      (task) =>
+        task.priority === "Critical" &&
+        task.status !== "Completed"
+    ).length;
+
   return (
     <div className="page">
+
       <section className="page-header-row">
+
         <div>
+
           <span className="eyebrow">
-            PhD defence preparation
+            PhD planning
           </span>
 
-          <h2>Viva examiner</h2>
+          <h2>
+            Research Planner
+          </h2>
 
           <p className="welcome-subtitle">
-            Practise explaining your research
-            under realistic questioning.
+            Plan objectives, research tasks,
+            experiments, writing targets,
+            submissions and guide-meeting preparation.
           </p>
+
         </div>
 
-        <button className="primary-button">
-          <MessageSquare size={16} />
-          Start viva
-        </button>
       </section>
 
-      <section className="viva-card">
-        <div className="viva-icon">
-          <GraduationCap size={25} />
+      <section className="hero-grid">
+
+        <div className="focus-card">
+
+          <div className="focus-card-header">
+
+            <div>
+
+              <span className="card-label">
+                Research workload
+              </span>
+
+              <h3>
+                Keep the PhD moving forward
+              </h3>
+
+            </div>
+
+            <div className="focus-icon">
+              <CalendarDays size={22} />
+            </div>
+
+          </div>
+
+          <p>
+            Convert your research objectives into
+            actionable tasks and deadlines so that
+            important research work does not get lost.
+          </p>
+
+          <div className="focus-meta">
+
+            <span>
+              <Target size={15} />
+              {activeTasks} active tasks
+            </span>
+
+            <span>
+              <Check size={15} />
+              {completedTasks} completed
+            </span>
+
+            <span>
+              <Zap size={15} />
+              {criticalTasks} critical
+            </span>
+
+          </div>
+
         </div>
 
-        <h3>
-          Your examiner is ready
-        </h3>
+        <div className="stats-card">
 
-        <p>
-          Questions can cover fundamentals,
-          methodology, literature, limitations,
-          experimental design and your
-          research contribution.
-        </p>
+          <div className="stats-header">
 
-        <div className="viva-topics">
-          <span>Fundamentals</span>
-          <span>Methodology</span>
-          <span>Literature</span>
-          <span>Limitations</span>
-          <span>Contribution</span>
+            <span className="card-label">
+              Completion
+            </span>
+
+            <Activity size={19} />
+
+          </div>
+
+          <div className="weekly-number">
+
+            {tasks.length === 0
+              ? 0
+              : Math.round(
+                  (completedTasks /
+                    tasks.length) *
+                    100
+                )}%
+
+          </div>
+
+          <p>
+            Planned tasks completed
+          </p>
+
+          <div className="progress-track">
+
+            <span
+              style={{
+                width:
+                  tasks.length === 0
+                    ? "0%"
+                    : `${
+                        (completedTasks /
+                          tasks.length) *
+                        100
+                      }%`,
+              }}
+            />
+
+          </div>
+
         </div>
+
       </section>
+
+      <section className="dashboard-columns">
+
+        <div>
+
+          <div className="section-heading">
+
+            <div>
+
+              <span className="eyebrow">
+                Planning
+              </span>
+
+              <h3>
+                Add research task
+              </h3>
+
+            </div>
+
+          </div>
+
+          <div className="simple-card">
+
+            <div className="manuscript-controls-card">
+
+              <label>
+                Category
+
+                <select
+                  value={category}
+                  onChange={(event) =>
+                    setCategory(
+                      event.target.value
+                    )
+                  }
+                >
+                  {categories.map(
+                    (item) => (
+                      <option
+                        key={item}
+                        value={item}
+                      >
+                        {item}
+                      </option>
+                    )
+                  )}
+                </select>
+
+              </label>
+
+              <label>
+                Task
+
+                <input
+                  value={taskTitle}
+                  onChange={(event) =>
+                    setTaskTitle(
+                      event.target.value
+                    )
+                  }
+                  placeholder="e.g. Compare RetFound with HAM-DNet"
+                />
+              </label>
+
+              <label>
+                Deadline
+
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(event) =>
+                    setDeadline(
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <label>
+                Priority
+
+                <select
+                  value={priority}
+                  onChange={(event) =>
+                    setPriority(
+                      event.target.value
+                    )
+                  }
+                >
+                  <option>
+                    Low
+                  </option>
+
+                  <option>
+                    Medium
+                  </option>
+
+                  <option>
+                    High
+                  </option>
+
+                  <option>
+                    Critical
+                  </option>
+                </select>
+              </label>
+
+            </div>
+
+            <div className="manuscript-editor-footer">
+
+              <span className="manuscript-editor-hint">
+                Use tasks for literature targets,
+                experiments, analysis, writing,
+                submissions and guide preparation.
+              </span>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={addTask}
+              >
+                <Plus size={16} />
+                Add task
+              </button>
+
+            </div>
+
+            {savedMessage && (
+              <div className="manuscript-save-message">
+                <Check size={15} />
+                {savedMessage}
+              </div>
+            )}
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section className="section-heading">
+
+        <div>
+
+          <span className="eyebrow">
+            Research workload
+          </span>
+
+          <h3>
+            Planned activities
+          </h3>
+
+        </div>
+
+      </section>
+
+      <section className="review-list">
+
+        {tasks.map((task) => (
+
+          <div
+            className="review-item"
+            key={task.id}
+          >
+
+            <div className="review-icon">
+              <Target size={18} />
+            </div>
+
+            <div>
+
+              <strong>
+                {task.title}
+              </strong>
+
+              <span>
+                {task.category} ·{" "}
+                {task.deadline} ·{" "}
+                {task.priority} priority
+              </span>
+
+            </div>
+
+            <select
+              value={task.status}
+              onChange={(event) =>
+                updateTaskStatus(
+                  task.id,
+                  event.target.value
+                )
+              }
+            >
+              <option>
+                Pending
+              </option>
+
+              <option>
+                In progress
+              </option>
+
+              <option>
+                Completed
+              </option>
+
+              <option>
+                Delayed
+              </option>
+            </select>
+
+          </div>
+
+        ))}
+
+      </section>
+
     </div>
   );
 }
@@ -10080,63 +10635,584 @@ function ThesisPage() {
     "Conclusion",
   ];
 
+  const [activeChapter, setActiveChapter] =
+    useState("Introduction");
+
+  const [chapterStatus, setChapterStatus] =
+    useState({
+      Introduction: "Drafting",
+      "Literature Review": "In progress",
+      "Research Methodology": "Planned",
+      "Proposed Framework": "Planned",
+      Experiments: "Planned",
+      Results: "Planned",
+      Discussion: "Planned",
+      Conclusion: "Planned",
+    });
+
+  const [chapterProgress, setChapterProgress] =
+    useState({
+      Introduction: 20,
+      "Literature Review": 10,
+      "Research Methodology": 0,
+      "Proposed Framework": 0,
+      Experiments: 0,
+      Results: 0,
+      Discussion: 0,
+      Conclusion: 0,
+    });
+
+  const [chapterNotes, setChapterNotes] =
+    useState({
+      Introduction: "",
+      "Literature Review": "",
+      "Research Methodology": "",
+      "Proposed Framework": "",
+      Experiments: "",
+      Results: "",
+      Discussion: "",
+      Conclusion: "",
+    });
+
+  const [savedMessage, setSavedMessage] =
+    useState("");
+
+  function updateChapterStatus(status) {
+    setChapterStatus((current) => ({
+      ...current,
+      [activeChapter]: status,
+    }));
+  }
+
+  function updateChapterProgress(progress) {
+    setChapterProgress((current) => ({
+      ...current,
+      [activeChapter]: Number(progress),
+    }));
+  }
+
+  function saveChapter() {
+    setSavedMessage(
+      `${activeChapter} saved successfully.`
+    );
+
+    setTimeout(() => {
+      setSavedMessage("");
+    }, 2500);
+  }
+
+  const totalProgress = Math.round(
+    Object.values(chapterProgress).reduce(
+      (sum, value) =>
+        sum + value,
+      0
+    ) / chapters.length
+  );
+
+  const completedChapters =
+    Object.values(chapterProgress).filter(
+      (value) => value === 100
+    ).length;
+
   return (
     <div className="page">
+
       <section className="page-header-row">
+
         <div>
+
           <span className="eyebrow">
             PhD thesis
           </span>
 
-          <h2>Thesis workspace</h2>
+          <h2>
+            Thesis workspace
+          </h2>
 
           <p className="welcome-subtitle">
-            Build your thesis progressively from
-            your research knowledge.
+            Build the thesis progressively from your
+            research evidence, experiments and writing.
           </p>
+
         </div>
 
-        <button className="primary-button">
+        <button
+          className="primary-button"
+          onClick={saveChapter}
+        >
           <FileText size={16} />
-          Open thesis
+          Save thesis update
         </button>
+
+      </section>
+
+      <section className="hero-grid">
+
+        <div className="focus-card">
+
+          <div className="focus-card-header">
+
+            <div>
+
+              <span className="card-label">
+                Current thesis
+              </span>
+
+              <h3>
+                IndiaRetNet PhD Thesis
+              </h3>
+
+            </div>
+
+            <div className="focus-icon">
+              <FileText size={22} />
+            </div>
+
+          </div>
+
+          <p>
+            Develop the thesis chapter by chapter,
+            connecting literature, research gaps,
+            methodology, experiments, results and
+            discussion.
+          </p>
+
+          <div className="focus-meta">
+
+            <span>
+              <FileText size={15} />
+              {chapters.length} chapters
+            </span>
+
+            <span>
+              <Check size={15} />
+              {completedChapters} completed
+            </span>
+
+            <span>
+              <Activity size={15} />
+              {totalProgress}% complete
+            </span>
+
+          </div>
+
+          <div className="focus-bottom">
+
+            <div className="progress-section">
+
+              <div className="progress-header">
+
+                <span>
+                  Thesis completion
+                </span>
+
+                <strong>
+                  {totalProgress}%
+                </strong>
+
+              </div>
+
+              <div className="progress-track">
+
+                <span
+                  style={{
+                    width:
+                      `${totalProgress}%`,
+                  }}
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="stats-card">
+
+          <div className="stats-header">
+
+            <span className="card-label">
+              Active chapter
+            </span>
+
+            <FileText size={19} />
+
+          </div>
+
+          <div className="weekly-number">
+            {chapterProgress[activeChapter]}%
+          </div>
+
+          <p>
+            {activeChapter}
+          </p>
+
+          <div className="focus-meta">
+
+            <span>
+              <Activity size={15} />
+              {chapterStatus[activeChapter]}
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section className="section-heading">
+
+        <div>
+
+          <span className="eyebrow">
+            Thesis structure
+          </span>
+
+          <h3>
+            Chapters
+          </h3>
+
+        </div>
+
       </section>
 
       <section className="thesis-board">
+
         {chapters.map(
-          (chapter, index) => (
-            <div
-              className="thesis-chapter"
-              key={chapter}
-            >
-              <div className="thesis-number">
-                {String(index + 1).padStart(
-                  2,
-                  "0"
-                )}
+          (chapter, index) => {
+
+            const active =
+              chapter ===
+              activeChapter;
+
+            return (
+              <button
+                type="button"
+                className={`thesis-chapter ${
+                  active
+                    ? "active"
+                    : ""
+                }`}
+                key={chapter}
+                onClick={() =>
+                  setActiveChapter(
+                    chapter
+                  )
+                }
+              >
+
+                <div className="thesis-number">
+
+                  {String(
+                    index + 1
+                  ).padStart(
+                    2,
+                    "0"
+                  )}
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {chapter}
+                  </strong>
+
+                  <span>
+                    {
+                      chapterStatus[
+                        chapter
+                      ]
+                    }{" "}
+                    ·{" "}
+                    {
+                      chapterProgress[
+                        chapter
+                      ]
+                    }%
+                  </span>
+
+                </div>
+
+                <ArrowRight
+                  size={15}
+                />
+
+              </button>
+            );
+          }
+        )}
+
+      </section>
+
+      <section className="dashboard-columns">
+
+        <div>
+
+          <div className="section-heading">
+
+            <div>
+
+              <span className="eyebrow">
+                Chapter workspace
+              </span>
+
+              <h3>
+                {activeChapter}
+              </h3>
+
+            </div>
+
+          </div>
+
+          <div className="simple-card manuscript-editor-card">
+
+            <div className="manuscript-editor-header">
+
+              <div className="focus-icon">
+                <FileText size={22} />
               </div>
 
               <div>
-                <strong>
-                  {chapter}
-                </strong>
+
+                <h3>
+                  {activeChapter}
+                </h3>
 
                 <span>
-                  {index === 0
-                    ? "In progress"
-                    : "Planned"}
+                  {
+                    chapterStatus[
+                      activeChapter
+                    ]
+                  }{" "}
+                  ·{" "}
+                  {
+                    chapterProgress[
+                      activeChapter
+                    ]
+                  }%
                 </span>
+
               </div>
 
-              <ArrowRight size={15} />
             </div>
-          )
-        )}
+
+            <textarea
+              className="manuscript-editor"
+              value={
+                chapterNotes[
+                  activeChapter
+                ]
+              }
+              onChange={(event) => {
+
+                setChapterNotes(
+                  (current) => ({
+                    ...current,
+                    [activeChapter]:
+                      event.target.value,
+                  })
+                );
+
+                setSavedMessage("");
+
+              }}
+              placeholder={
+                `Write notes, evidence, arguments, references and chapter content for ${activeChapter}...`
+              }
+            />
+
+            <div className="manuscript-editor-footer">
+
+              <span className="manuscript-editor-hint">
+                Connect this chapter with your research
+                evidence as your PhD develops.
+              </span>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={saveChapter}
+              >
+                <Check size={16} />
+                Save chapter
+              </button>
+
+            </div>
+
+            {savedMessage && (
+              <div className="manuscript-save-message">
+                <Check size={15} />
+                {savedMessage}
+              </div>
+            )}
+
+          </div>
+
+        </div>
+
+        <div>
+
+          <div className="section-heading">
+
+            <div>
+
+              <span className="eyebrow">
+                Chapter controls
+              </span>
+
+              <h3>
+                Progress
+              </h3>
+
+            </div>
+
+          </div>
+
+          <div className="simple-card manuscript-controls-card">
+
+            <label>
+
+              Status
+
+              <select
+                value={
+                  chapterStatus[
+                    activeChapter
+                  ]
+                }
+                onChange={(event) =>
+                  updateChapterStatus(
+                    event.target.value
+                  )
+                }
+              >
+
+                <option>
+                  Planned
+                </option>
+
+                <option>
+                  Drafting
+                </option>
+
+                <option>
+                  In progress
+                </option>
+
+                <option>
+                  Under review
+                </option>
+
+                <option>
+                  Completed
+                </option>
+
+              </select>
+
+            </label>
+
+            <label>
+
+              Progress
+
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={
+                  chapterProgress[
+                    activeChapter
+                  ]
+                }
+                onChange={(event) =>
+                  updateChapterProgress(
+                    event.target.value
+                  )
+                }
+              />
+
+            </label>
+
+            <div className="progress-header">
+
+              <span>
+                Chapter completion
+              </span>
+
+              <strong>
+                {
+                  chapterProgress[
+                    activeChapter
+                  ]
+                }%
+              </strong>
+
+            </div>
+
+            <div className="progress-track">
+
+              <span
+                style={{
+                  width:
+                    `${
+                      chapterProgress[
+                        activeChapter
+                      ]
+                    }%`,
+                }}
+              />
+
+            </div>
+
+          </div>
+
+          <div className="simple-card">
+
+            <div className="focus-icon">
+              <Network size={22} />
+            </div>
+
+            <h3>
+              Research evidence
+            </h3>
+
+            <p>
+              Literature, research gaps, experiments
+              and manuscript findings can progressively
+              feed into this thesis chapter.
+            </p>
+
+            <div className="focus-meta">
+
+              <span>
+                <BookOpen size={15} />
+                Literature
+              </span>
+
+              <span>
+                <Lightbulb size={15} />
+                Research gaps
+              </span>
+
+              <span>
+                <FlaskConical size={15} />
+                Experiments
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </section>
+
     </div>
   );
 }
-
 /* =========================================================
    DEFAULT EXPORT
    IMPORTANT: THIS MUST APPEAR ONLY ONCE.
