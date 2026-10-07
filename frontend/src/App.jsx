@@ -29,6 +29,7 @@ import {
   MoreHorizontal,
   Network,
   NotebookPen,
+  PenLine,
   Play,
   Plus,
   Search,
@@ -609,224 +610,356 @@ function TodayPage({ navigate }) {
   return (
     <div className="page">
       <section className="welcome-row">
-        <div>
-          <div className="eyebrow">
-            Thursday · September 19
-          </div>
+  <div>
+    <div className="eyebrow">
+      PhD Research Command Center
+    </div>
 
-          <h2>Good afternoon.</h2>
+    <h2>Good afternoon.</h2>
 
-          <p className="welcome-subtitle">
-            Keep your research moving with one
-            focused session at a time.
-          </p>
-        </div>
+    <p className="welcome-subtitle">
+      Keep your research moving by connecting
+      literature, knowledge, gaps, experiments,
+      and writing.
+    </p>
+  </div>
 
-        <button
-          className="primary-button"
-          onClick={() =>
-            navigate("learn")
-          }
-        >
-          <Play
-            size={16}
-            fill="currentColor"
-          />
-          Start today's session
-        </button>
-      </section>
+  <button
+    className="primary-button"
+    onClick={() =>
+      navigate("papers")
+    }
+  >
+    <BookOpen
+      size={16}
+    />
+    Open research library
+  </button>
+</section>
 
       <section className="hero-grid">
         <div className="focus-card">
-          <div className="focus-card-header">
-            <div>
-              <span className="card-label">
-                Today's focus
-              </span>
+  <div className="focus-card-header">
+    <div>
+      <span className="card-label">
+        PhD research progress
+      </span>
 
-              <h3>
-                Understand attention mechanisms
-              </h3>
-            </div>
+      <h3>
+        Your research is moving forward
+      </h3>
+    </div>
 
-            <div className="focus-icon">
-              <Brain size={22} />
-            </div>
-          </div>
+    <div className="focus-icon">
+      <Brain size={22} />
+    </div>
+  </div>
 
-          <p>
-            Build a clear mental model of how
-            attention works before moving deeper
-            into transformers and vision
-            architectures.
-          </p>
+  <p>
+    Track your literature, research gaps,
+    experiments, and academic writing from
+    one connected research workspace.
+  </p>
 
-          <div className="focus-meta">
-            <span>
-              <Clock3 size={15} />
-              35 minutes
-            </span>
+  <div className="focus-meta">
+    <span>
+      <BookOpen size={15} />
+      Literature
+    </span>
 
-            <span>
-              <Brain size={15} />
-              Deep Dive
-            </span>
+    <span>
+      <Lightbulb size={15} />
+      Research gaps
+    </span>
 
-            <span>
-              <Target size={15} />
-              Priority
-            </span>
-          </div>
+    <span>
+      <FlaskConical size={15} />
+      Experiments
+    </span>
+  </div>
 
-          <div className="focus-bottom">
-            <div className="progress-section">
-              <div className="progress-header">
-                <span>Understanding</span>
-                <strong>72%</strong>
-              </div>
+  <div className="focus-bottom">
+    <div className="progress-section">
+      <div className="progress-header">
+        <span>Overall PhD progress</span>
+        <strong>18%</strong>
+      </div>
 
-              <div className="progress-track">
-                <span
-                  style={{
-                    width: "72%",
-                  }}
-                />
-              </div>
-            </div>
+      <div className="progress-track">
+        <span
+          style={{
+            width: "18%",
+          }}
+        />
+      </div>
+    </div>
 
-            <button
-              className="text-button"
-              onClick={() =>
-                navigate("learn")
-              }
-            >
-              Continue{" "}
-              <ArrowRight size={15} />
-            </button>
-          </div>
-        </div>
+    <button
+      className="text-button"
+      onClick={() =>
+        navigate("experiments")
+      }
+    >
+      View research
+      <ArrowRight size={15} />
+    </button>
+  </div>
+</div>
 
         <div className="stats-card">
-          <div className="stats-header">
-            <span className="card-label">
-              This week
-            </span>
+  <div className="stats-header">
+    <span className="card-label">
+      Research activity
+    </span>
 
-            <Activity size={19} />
-          </div>
+    <Activity size={19} />
+  </div>
 
-          <div className="weekly-number">
-            6.4h
-          </div>
+  <div className="weekly-number">
+    13
+  </div>
 
-          <p>research & learning</p>
+  <p>papers in your library</p>
 
-          <div className="week-bars">
-            {[40, 65, 52, 78, 90, 46, 25].map(
-              (height, index) => (
-                <div
-                  className="week-day"
-                  key={index}
-                >
-                  <div className="week-bar">
-                    <span
-                      style={{
-                        height: `${height}%`,
-                      }}
-                    />
-                  </div>
-
-                  <small>
-                    {
-                      [
-                        "M",
-                        "T",
-                        "W",
-                        "T",
-                        "F",
-                        "S",
-                        "S",
-                      ][index]
-                    }
-                  </small>
-                </div>
-              )
-            )}
-          </div>
-
-          <div className="stats-footer">
-            <span>Goal</span>
-            <strong>8h / week</strong>
-          </div>
+  <div className="week-bars">
+    {[
+      {
+        label: "P",
+        value: 13,
+      },
+      {
+        label: "K",
+        value: 8,
+      },
+      {
+        label: "G",
+        value: 3,
+      },
+      {
+        label: "E",
+        value: 5,
+      },
+      {
+        label: "M",
+        value: 42,
+      },
+      {
+        label: "T",
+        value: 18,
+      },
+      {
+        label: "V",
+        value: 72,
+      },
+    ].map((item) => (
+      <div
+        className="week-day"
+        key={item.label}
+      >
+        <div className="week-bar">
+          <span
+            style={{
+              height: `${Math.min(
+                item.value,
+                100
+              )}%`,
+            }}
+          />
         </div>
+
+        <small>{item.label}</small>
+      </div>
+    ))}
+  </div>
+
+  <div className="stats-footer">
+    <span>Papers · Knowledge · Gaps · Experiments</span>
+    <strong>Active</strong>
+  </div>
+</div>
       </section>
 
       <div className="section-heading">
-        <div>
-          <span className="eyebrow">
-            Your queue
-          </span>
+  <div>
+    <span className="eyebrow">
+      Your priorities
+    </span>
 
-          <h3>Continue learning</h3>
-        </div>
+    <h3>Research priorities</h3>
+  </div>
 
-        <button
-          className="ghost-button"
-          onClick={() =>
-            navigate("learn")
-          }
-        >
-          View all{" "}
-          <ArrowRight size={15} />
-        </button>
-      </div>
+  <button
+    className="ghost-button"
+    onClick={() =>
+      navigate("experiments")
+    }
+  >
+    View research{" "}
+    <ArrowRight size={15} />
+  </button>
+</div>
 
       <section className="learning-grid">
-        {learningTasks.map((task) => {
-          const Icon = task.icon;
+  <button
+    className="learning-card"
+    onClick={() =>
+      navigate("papers")
+    }
+  >
+    <div className="learning-card-top">
+      <div className="learning-icon">
+        <BookOpen size={19} />
+      </div>
 
-          return (
-            <button
-              className="learning-card"
-              key={task.id}
-              onClick={() =>
-                navigate("learn")
-              }
-            >
-              <div className="learning-card-top">
-                <div className="learning-icon">
-                  <Icon size={19} />
-                </div>
+      <span className="learning-type">
+        Literature
+      </span>
+    </div>
 
-                <span className="learning-type">
-                  {task.type}
-                </span>
-              </div>
+    <h4>
+      Analyse your latest research papers
+    </h4>
 
-              <h4>{task.title}</h4>
+    <div className="learning-card-bottom">
+      <span>
+        <BookOpen size={14} />
+        Papers
+      </span>
 
-              <div className="learning-card-bottom">
-                <span>
-                  <Clock3 size={14} />
-                  {task.duration}
-                </span>
+      <span>
+        13
+      </span>
+    </div>
 
-                <span>
-                  {task.progress}%
-                </span>
-              </div>
+    <div className="tiny-progress">
+      <span
+        style={{
+          width: "65%",
+        }}
+      />
+    </div>
+  </button>
 
-              <div className="tiny-progress">
-                <span
-                  style={{
-                    width: `${task.progress}%`,
-                  }}
-                />
-              </div>
-            </button>
-          );
-        })}
-      </section>
+  <button
+    className="learning-card"
+    onClick={() =>
+      navigate("gaps")
+    }
+  >
+    <div className="learning-card-top">
+      <div className="learning-icon">
+        <Lightbulb size={19} />
+      </div>
+
+      <span className="learning-type">
+        Research Gap
+      </span>
+    </div>
+
+    <h4>
+      Review and validate your open research gaps
+    </h4>
+
+    <div className="learning-card-bottom">
+      <span>
+        <Lightbulb size={14} />
+        Gap analysis
+      </span>
+
+      <span>
+        3
+      </span>
+    </div>
+
+    <div className="tiny-progress">
+      <span
+        style={{
+          width: "45%",
+        }}
+      />
+    </div>
+  </button>
+
+  <button
+    className="learning-card"
+    onClick={() =>
+      navigate("experiments")
+    }
+  >
+    <div className="learning-card-top">
+      <div className="learning-icon">
+        <FlaskConical size={19} />
+      </div>
+
+      <span className="learning-type">
+        Experiment
+      </span>
+    </div>
+
+    <h4>
+      Continue your active research experiments
+    </h4>
+
+    <div className="learning-card-bottom">
+      <span>
+        <FlaskConical size={14} />
+        Experiments
+      </span>
+
+      <span>
+        5
+      </span>
+    </div>
+
+    <div className="tiny-progress">
+      <span
+        style={{
+          width: "55%",
+        }}
+      />
+    </div>
+  </button>
+
+  <button
+    className="learning-card"
+    onClick={() =>
+      navigate("manuscript")
+    }
+  >
+    <div className="learning-card-top">
+      <div className="learning-icon">
+        <PenLine size={19} />
+      </div>
+
+      <span className="learning-type">
+        Writing
+      </span>
+    </div>
+
+    <h4>
+      Continue developing your manuscript
+    </h4>
+
+    <div className="learning-card-bottom">
+      <span>
+        <PenLine size={14} />
+        Manuscript
+      </span>
+
+      <span>
+        42%
+      </span>
+    </div>
+
+    <div className="tiny-progress">
+      <span
+        style={{
+          width: "42%",
+        }}
+      />
+    </div>
+  </button>
+</section>
 
       <div className="dashboard-columns">
         <section>
