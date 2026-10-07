@@ -8993,3 +8993,507 @@ a {
   font-size: 13px;
   font-weight: 600;
 }
+/* =========================================================
+   RESEARCH MANAGEMENT PAGES
+   Research Log + Research Planner + Thesis
+========================================================= */
+
+
+/* =========================================================
+   RESEARCH LOG
+========================================================= */
+
+.research-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.research-log-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.research-log-form label,
+.research-planner-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.research-log-form input,
+.research-log-form select,
+.research-log-form textarea,
+.research-planner-form input,
+.research-planner-form select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.research-log-form textarea {
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.research-log-form input:focus,
+.research-log-form select:focus,
+.research-log-form textarea:focus,
+.research-planner-form input:focus,
+.research-planner-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.research-log-form-footer,
+.research-planner-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.research-log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.research-log-entry + .research-log-entry {
+  margin-top: 10px;
+}
+
+.research-log-entry:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+}
+
+.research-log-entry-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.research-log-entry-content strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.research-log-entry-content > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.research-log-entry-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.research-log-entry-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.research-log-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   RESEARCH PLANNER
+========================================================= */
+
+.research-planner-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.research-planner-form-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(150px, 0.6fr)
+    minmax(150px, 0.6fr);
+  gap: 16px;
+}
+
+.research-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.research-task {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.research-task:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+  transform: translateY(-1px);
+}
+
+.research-task-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.research-task-content {
+  min-width: 0;
+}
+
+.research-task-content strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.research-task-content span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.research-task select {
+  min-width: 130px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.research-task select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+
+/* =========================================================
+   RESEARCH PLANNER — PRIORITY / STATUS
+========================================================= */
+
+.research-priority {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-left: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.research-planner-progress {
+  margin-top: 18px;
+}
+
+.research-planner-progress .progress-track {
+  margin-top: 8px;
+}
+
+
+/* =========================================================
+   THESIS WORKSPACE
+========================================================= */
+
+.thesis-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.thesis-chapter {
+  width: 100%;
+  min-height: 76px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.thesis-chapter:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+  transform: translateY(-1px);
+}
+
+.thesis-chapter.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.thesis-chapter > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.thesis-chapter strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.thesis-chapter span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.thesis-chapter > svg {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.thesis-chapter.active > svg {
+  color: var(--accent);
+}
+
+.thesis-number {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   THESIS — CHAPTER CONTROLS
+========================================================= */
+
+.thesis-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.thesis-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.thesis-controls select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.thesis-controls select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.thesis-progress-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.thesis-progress-value strong {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   SHARED FORM INPUTS FOR NEW RESEARCH PAGES
+========================================================= */
+
+.research-management-form input::placeholder,
+.research-management-form textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+
+/* =========================================================
+   RESPONSIVE — RESEARCH MANAGEMENT
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .research-planner-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .research-task {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .research-task select {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .thesis-board {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 720px) {
+
+  .research-log-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .research-planner-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .research-log-form-footer,
+  .research-planner-form-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .research-log-entry {
+    padding: 15px;
+  }
+
+  .research-task {
+    grid-template-columns: 38px minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .research-task-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .research-task select {
+    grid-column: 1 / -1;
+  }
+
+  .thesis-chapter {
+    padding: 14px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .research-log-entry {
+    gap: 10px;
+  }
+
+  .research-log-entry-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .thesis-number {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+}
