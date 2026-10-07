@@ -309,7 +309,7 @@ function App() {
           )}
 
           {activePage === "audio" && (
-            <ProgressReportspage />
+            <ProgressReportsPage />
           )}
 
           {activePage === "viva" && (
