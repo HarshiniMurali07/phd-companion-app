@@ -9615,6 +9615,59 @@ function VivaPage() {
 ========================================================= */
 
 function ManuscriptPage() {
+  const sections = [
+    "Introduction",
+    "Related Work",
+    "Methodology",
+    "Experiments",
+    "Results",
+    "Discussion",
+  ];
+
+  const [activeSection, setActiveSection] =
+    useState("Introduction");
+
+  const [sectionStatus, setSectionStatus] =
+    useState({
+      Introduction: "Drafting",
+      "Related Work": "Not started",
+      Methodology: "Not started",
+      Experiments: "Not started",
+      Results: "Not started",
+      Discussion: "Not started",
+    });
+
+  const [sectionProgress, setSectionProgress] =
+    useState({
+      Introduction: 20,
+      "Related Work": 0,
+      Methodology: 0,
+      Experiments: 0,
+      Results: 0,
+      Discussion: 0,
+    });
+
+  function updateSectionStatus(status) {
+    setSectionStatus((current) => ({
+      ...current,
+      [activeSection]: status,
+    }));
+  }
+
+  function updateSectionProgress(progress) {
+    setSectionProgress((current) => ({
+      ...current,
+      [activeSection]: Number(progress),
+    }));
+  }
+
+  const totalProgress = Math.round(
+    Object.values(sectionProgress).reduce(
+      (sum, value) => sum + value,
+      0
+    ) / sections.length
+  );
+
   return (
     <div className="page">
       <section className="page-header-row">
@@ -9626,49 +9679,276 @@ function ManuscriptPage() {
           <h2>Manuscript</h2>
 
           <p className="welcome-subtitle">
-            Organise ideas, references and
-            sections for future publications.
+            Turn your research evidence into a
+            structured academic manuscript.
           </p>
         </div>
 
-        <button className="primary-button">
+        <button
+          className="primary-button"
+          onClick={() =>
+            alert("Manuscript creation will be added next.")
+          }
+        >
           <Plus size={16} />
           New manuscript
         </button>
       </section>
 
-      <section className="writing-board">
-        {[
-          "Introduction",
-          "Related Work",
-          "Methodology",
-          "Experiments",
-          "Results",
-          "Discussion",
-        ].map((section, index) => (
-          <div
-            className="writing-section"
-            key={section}
-          >
-            <div className="writing-section-number">
-              {index + 1}
+      <section className="hero-grid">
+        <div className="focus-card">
+          <div className="focus-card-header">
+            <div>
+              <span className="card-label">
+                Current manuscript
+              </span>
+
+              <h3>
+                IndiaRetNet Research Manuscript
+              </h3>
             </div>
 
+            <div className="focus-icon">
+              <NotebookPen size={22} />
+            </div>
+          </div>
+
+          <p>
+            Build the manuscript progressively from
+            your literature, research gaps,
+            experiments and results.
+          </p>
+
+          <div className="focus-meta">
+            <span>
+              <FileText size={15} />
+              Journal manuscript
+            </span>
+
+            <span>
+              <Target size={15} />
+              Year 1
+            </span>
+
+            <span>
+              <Activity size={15} />
+              {totalProgress}% complete
+            </span>
+          </div>
+
+          <div className="focus-bottom">
+            <div className="progress-section">
+              <div className="progress-header">
+                <span>
+                  Manuscript completion
+                </span>
+
+                <strong>
+                  {totalProgress}%
+                </strong>
+              </div>
+
+              <div className="progress-track">
+                <span
+                  style={{
+                    width: `${totalProgress}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="stats-card">
+          <div className="stats-header">
+            <span className="card-label">
+              Active section
+            </span>
+
+            <NotebookPen size={19} />
+          </div>
+
+          <div className="weekly-number">
+            {sectionProgress[activeSection]}%
+          </div>
+
+          <p>
+            {activeSection}
+          </p>
+
+          <div className="focus-meta">
+            <span>
+              <Activity size={15} />
+              {sectionStatus[activeSection]}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-heading">
+        <div>
+          <span className="eyebrow">
+            Manuscript structure
+          </span>
+
+          <h3>
+            Writing sections
+          </h3>
+        </div>
+      </section>
+
+      <section className="writing-board">
+        {sections.map((section, index) => {
+          const active =
+            section === activeSection;
+
+          return (
+            <button
+              key={section}
+              type="button"
+              className={`writing-section ${
+                active ? "active" : ""
+              }`}
+              onClick={() =>
+                setActiveSection(section)
+              }
+            >
+              <div className="writing-section-number">
+                {index + 1}
+              </div>
+
+              <div>
+                <strong>
+                  {section}
+                </strong>
+
+                <span>
+                  {sectionStatus[section]} ·{" "}
+                  {sectionProgress[section]}%
+                </span>
+              </div>
+
+              <ArrowRight size={15} />
+            </button>
+          );
+        })}
+      </section>
+
+      <section className="dashboard-columns">
+        <div>
+          <div className="section-heading">
             <div>
-              <strong>
-                {section}
-              </strong>
+              <span className="eyebrow">
+                Section editor
+              </span>
+
+              <h3>
+                {activeSection}
+              </h3>
+            </div>
+          </div>
+
+          <div className="simple-card">
+            <div className="focus-icon">
+              <NotebookPen size={22} />
+            </div>
+
+            <h3>
+              {activeSection}
+            </h3>
+
+            <p>
+              This section will become your working
+              academic draft. We will add the full
+              editor and database saving in the next
+              Manuscript step.
+            </p>
+
+            <div className="focus-meta">
+              <span>
+                <Activity size={15} />
+                {sectionProgress[activeSection]}%
+              </span>
 
               <span>
-                {index === 0
-                  ? "Drafting"
-                  : "Not started"}
+                <Check size={15} />
+                {sectionStatus[activeSection]}
               </span>
             </div>
-
-            <ArrowRight size={15} />
           </div>
-        ))}
+        </div>
+
+        <div>
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                Section controls
+              </span>
+
+              <h3>
+                Update progress
+              </h3>
+            </div>
+          </div>
+
+          <div className="simple-card">
+            <label>
+              Status
+            </label>
+
+            <select
+              value={sectionStatus[activeSection]}
+              onChange={(event) =>
+                updateSectionStatus(
+                  event.target.value
+                )
+              }
+            >
+              <option>
+                Not started
+              </option>
+
+              <option>
+                Drafting
+              </option>
+
+              <option>
+                In review
+              </option>
+
+              <option>
+                Completed
+              </option>
+            </select>
+
+            <label>
+              Progress
+            </label>
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={sectionProgress[activeSection]}
+              onChange={(event) =>
+                updateSectionProgress(
+                  event.target.value
+                )
+              }
+            />
+
+            <div className="progress-header">
+              <span>
+                Section progress
+              </span>
+
+              <strong>
+                {sectionProgress[activeSection]}%
+              </strong>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
