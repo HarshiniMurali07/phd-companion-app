@@ -16,6 +16,8 @@ from app.routes import (
     experiments,
     learn,
     folders,
+    datasets,
+
 )
 
 
@@ -92,7 +94,9 @@ app.include_router(
     folders.router
 )
 
-
+app.include_router(
+    datasets.router
+)
 # =========================================================
 # ROOT
 # =========================================================
