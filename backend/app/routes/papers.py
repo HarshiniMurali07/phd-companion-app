@@ -22,6 +22,7 @@ from ..database import get_db
 from ..models import Paper, PaperSection
 from ..schemas import (
     PaperCreate,
+    PaperDetailsUpdate
     PaperListResponse,
     PaperNotesUpdate,
     PaperResponse,
@@ -2697,7 +2698,123 @@ def update_paper_tracker(
         "updated_at": paper.updated_at,
     }
 
+# =========================================================
+# EDIT PAPER DETAILS
+# =========================================================
 
+@router.put(
+    "/{paper_id}/details",
+)
+def update_paper_details(
+    paper_id: int,
+    details: PaperDetailsUpdate,
+    db: Session = Depends(get_db),
+):
+
+    paper = (
+        db.query(Paper)
+        .filter(
+            Paper.id == paper_id
+        )
+        .first()
+    )
+
+    if not paper:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Paper not found.",
+        )
+
+    fields = details.model_dump(
+        exclude_unset=True
+    )
+
+    if "title" in fields:
+
+        title = (
+            fields["title"] or ""
+        ).strip()
+
+        if not title:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Title cannot be empty.",
+            )
+
+        if len(title) > 500:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Title must be 500 "
+                    "characters or fewer."
+                ),
+            )
+
+        paper.title = title
+
+    if "authors" in fields:
+
+        paper.authors = (
+            (fields["authors"] or "").strip()
+            or None
+        )
+
+    if "journal" in fields:
+
+        journal = (
+            (fields["journal"] or "").strip()
+            or None
+        )
+
+        if journal and len(journal) > 300:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Journal must be 300 "
+                    "characters or fewer."
+                ),
+            )
+
+        paper.journal = journal
+
+    if "year" in fields:
+
+        year = fields["year"]
+
+        if (
+            year is not None
+            and not 1900 <= year <= 2100
+        ):
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Year must be between "
+                    "1900 and 2100."
+                ),
+            )
+
+        paper.year = year
+
+    paper.updated_at = datetime.utcnow()
+
+    db.commit()
+
+    db.refresh(paper)
+
+    return {
+        "message": "Paper details saved successfully.",
+        "paper_id": paper.id,
+        "title": paper.title,
+        "authors": paper.authors,
+        "year": paper.year,
+        "journal": paper.journal,
+        "updated_at": paper.updated_at,
+    }
 # =========================================================
 # DELETE PAPER
 # =========================================================
