@@ -16,6 +16,10 @@ import {
   FileSearch,
   FileText,
   FlaskConical,
+  Folder,
+  FolderOpen,
+  FolderPlus,
+  Trash2,
   Gauge,
   GraduationCap,
   Headphones,
@@ -1077,6 +1081,25 @@ function TodayPage({ navigate }) {
 /* =========================================================
    PAPERS
 ========================================================= */
+const FOLDER_COLORS = [
+  "#6366f1",
+  "#0ea5e9",
+  "#10b981",
+  "#f59e0b",
+  "#ec4899",
+  "#8b5cf6",
+  "#14b8a6",
+  "#ef4444",
+];
+
+async function readApiError(response, fallback) {
+  try {
+    const data = await response.json();
+    return data?.detail || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 function PapersPage({ onOpenPaper }) {
   const [papers, setPapers] = useState(
@@ -1094,6 +1117,21 @@ function PapersPage({ onOpenPaper }) {
 
   const [groupBy, setGroupBy] =
     useState("all");
+
+  // ---- Folders ----
+  const [folders, setFolders] = useState([]);
+  const [activeFolder, setActiveFolder] =
+    useState("all");
+  const [creatingFolder, setCreatingFolder] =
+    useState(false);
+  const [newFolderName, setNewFolderName] =
+    useState("");
+  const [folderError, setFolderError] =
+    useState("");
+  const [draggingPaperId, setDraggingPaperId] =
+    useState(null);
+  const [dragOverFolder, setDragOverFolder] =
+    useState(null);
 
   async function loadPapers() {
     try {
@@ -1127,64 +1165,372 @@ function PapersPage({ onOpenPaper }) {
     }
   }
 
-  async function handleDeletePaper(paper) {
-  const confirmed = window.confirm(
-    `Delete "${paper.title}"?\n\nThis will permanently delete the paper and its stored PDF.`
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    setError("");
-
-    const response = await fetch(
-      `${API_BASE_URL}/api/papers/${paper.id}`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    let data = null;
-
+  async function loadFolders() {
     try {
-      data = await response.json();
-    } catch {
-      // No JSON response.
-    }
+      const response = await fetch(
+        `${API_BASE_URL}/api/folders/`
+      );
 
-    if (!response.ok) {
-      throw new Error(
-        data?.detail ||
-          `Could not delete the paper (${response.status}).`
+      if (!response.ok) {
+        throw new Error(
+          "Could not load folders."
+        );
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setFolders(data);
+      }
+    } catch (err) {
+      console.error(err);
+      setFolderError(
+        "Could not load your folders."
       );
     }
-
-    setPapers((currentPapers) =>
-      currentPapers.filter(
-        (currentPaper) =>
-          String(currentPaper.id) !== String(paper.id)
-      )
-    );
-  } catch (err) {
-    console.error(err);
-
-    setError(
-      err.message ||
-        "Could not delete the paper."
-    );
   }
-}
 
-useEffect(() => {
-  loadPapers();
-}, []);
+  async function handleDeletePaper(paper) {
+    const confirmed = window.confirm(
+      `Delete "${paper.title}"?\n\nThis will permanently delete the paper and its stored PDF.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/papers/${paper.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        // No JSON response.
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+            `Could not delete the paper (${response.status}).`
+        );
+      }
+
+      setPapers((currentPapers) =>
+        currentPapers.filter(
+          (currentPaper) =>
+            String(currentPaper.id) !== String(paper.id)
+        )
+      );
+
+      setFolders((currentFolders) =>
+        currentFolders.map((folder) => ({
+          ...folder,
+          paper_ids: (folder.paper_ids || []).filter(
+            (id) => id !== paper.id
+          ),
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.message ||
+          "Could not delete the paper."
+      );
+    }
+  }
+
+  useEffect(() => {
+    loadPapers();
+    loadFolders();
+  }, []);
 
   async function handleUploadComplete() {
     setUploadOpen(false);
     await loadPapers();
   }
+
+  // ---------------------------------------------------------
+  // Folder actions
+  // ---------------------------------------------------------
+
+  async function handleCreateFolder(event) {
+    event.preventDefault();
+
+    const name = newFolderName.trim();
+
+    if (!name) {
+      return;
+    }
+
+    try {
+      setFolderError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/folders/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            color:
+              FOLDER_COLORS[
+                folders.length % FOLDER_COLORS.length
+              ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await readApiError(
+            response,
+            "Could not create the folder."
+          )
+        );
+      }
+
+      const created = await response.json();
+
+      setFolders((current) => [
+        ...current,
+        created,
+      ]);
+
+      setNewFolderName("");
+      setCreatingFolder(false);
+    } catch (err) {
+      console.error(err);
+      setFolderError(
+        err.message ||
+          "Could not create the folder."
+      );
+    }
+  }
+
+  async function handleRenameFolder(folder) {
+    const input = window.prompt(
+      "Rename folder",
+      folder.name
+    );
+
+    if (input === null) {
+      return;
+    }
+
+    const name = input.trim();
+
+    if (!name || name === folder.name) {
+      return;
+    }
+
+    try {
+      setFolderError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/folders/${folder.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await readApiError(
+            response,
+            "Could not rename the folder."
+          )
+        );
+      }
+
+      const updated = await response.json();
+
+      setFolders((current) =>
+        current.map((item) =>
+          item.id === updated.id ? updated : item
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      setFolderError(
+        err.message ||
+          "Could not rename the folder."
+      );
+    }
+  }
+
+  async function handleDeleteFolder(folder) {
+    const confirmed = window.confirm(
+      `Delete the folder "${folder.name}"?\n\nYour papers will NOT be deleted. Only the folder is removed.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setFolderError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/folders/${folder.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await readApiError(
+            response,
+            "Could not delete the folder."
+          )
+        );
+      }
+
+      setFolders((current) =>
+        current.filter(
+          (item) => item.id !== folder.id
+        )
+      );
+
+      if (activeFolder === folder.id) {
+        setActiveFolder("all");
+      }
+    } catch (err) {
+      console.error(err);
+      setFolderError(
+        err.message ||
+          "Could not delete the folder."
+      );
+    }
+  }
+
+  async function changeFolderMembership(
+    folderId,
+    paperId,
+    method
+  ) {
+    try {
+      setFolderError("");
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/folders/${folderId}/papers/${paperId}`,
+        { method }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await readApiError(
+            response,
+            "Could not update the folder."
+          )
+        );
+      }
+
+      const updated = await response.json();
+
+      setFolders((current) =>
+        current.map((item) =>
+          item.id === updated.id ? updated : item
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      setFolderError(
+        err.message ||
+          "Could not update the folder."
+      );
+    }
+  }
+
+  function addPaperToFolder(folderId, paperId) {
+    return changeFolderMembership(
+      folderId,
+      paperId,
+      "POST"
+    );
+  }
+
+  function removePaperFromFolder(folderId, paperId) {
+    return changeFolderMembership(
+      folderId,
+      paperId,
+      "DELETE"
+    );
+  }
+
+  // ---------------------------------------------------------
+  // Drag and drop
+  // ---------------------------------------------------------
+
+  function handlePaperDragStart(event, paper) {
+    event.dataTransfer.setData(
+      "text/plain",
+      String(paper.id)
+    );
+    event.dataTransfer.effectAllowed = "copy";
+    setDraggingPaperId(paper.id);
+  }
+
+  function handlePaperDragEnd() {
+    setDraggingPaperId(null);
+    setDragOverFolder(null);
+  }
+
+  function handleFolderDragOver(event, folder) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    setDragOverFolder(folder.id);
+  }
+
+  function handleFolderDragLeave(event, folder) {
+    if (
+      event.currentTarget.contains(
+        event.relatedTarget
+      )
+    ) {
+      return;
+    }
+
+    setDragOverFolder((current) =>
+      current === folder.id ? null : current
+    );
+  }
+
+  function handleFolderDrop(event, folder) {
+    event.preventDefault();
+
+    const paperId =
+      Number(
+        event.dataTransfer.getData("text/plain")
+      ) || draggingPaperId;
+
+    setDragOverFolder(null);
+    setDraggingPaperId(null);
+
+    if (paperId) {
+      addPaperToFolder(folder.id, paperId);
+    }
+  }
+
+  // ---------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------
 
   function getPaperTopics(paper) {
     if (Array.isArray(paper.tags)) {
@@ -1226,12 +1572,49 @@ useEffect(() => {
     ).length;
   }
 
+  const foldersByPaper = useMemo(() => {
+    const map = {};
+
+    folders.forEach((folder) => {
+      (folder.paper_ids || []).forEach(
+        (paperId) => {
+          if (!map[paperId]) {
+            map[paperId] = [];
+          }
+
+          map[paperId].push(folder);
+        }
+      );
+    });
+
+    return map;
+  }, [folders]);
+
+  const activeFolderObj =
+    activeFolder === "all"
+      ? null
+      : folders.find(
+          (folder) => folder.id === activeFolder
+        ) || null;
+
+  const visiblePapers = useMemo(() => {
+    if (!activeFolderObj) {
+      return papers;
+    }
+
+    const ids = activeFolderObj.paper_ids || [];
+
+    return papers.filter((paper) =>
+      ids.includes(paper.id)
+    );
+  }, [papers, activeFolderObj]);
+
   const groupedPapers = useMemo(() => {
     if (groupBy === "all") {
       return [
         {
           label: "All papers",
-          papers,
+          papers: visiblePapers,
         },
       ];
     }
@@ -1239,7 +1622,7 @@ useEffect(() => {
     if (groupBy === "topic") {
       const groups = {};
 
-      papers.forEach((paper) => {
+      visiblePapers.forEach((paper) => {
         const topics = getPaperTopics(paper);
 
         topics.forEach((topic) => {
@@ -1264,7 +1647,7 @@ useEffect(() => {
     if (groupBy === "status") {
       const groups = {};
 
-      papers.forEach((paper) => {
+      visiblePapers.forEach((paper) => {
         const status =
           paper.status || "To Read";
 
@@ -1288,7 +1671,7 @@ useEffect(() => {
     if (groupBy === "year") {
       const groups = {};
 
-      papers.forEach((paper) => {
+      visiblePapers.forEach((paper) => {
         const year =
           paper.year || "Year not available";
 
@@ -1316,10 +1699,10 @@ useEffect(() => {
     return [
       {
         label: "All papers",
-        papers,
+        papers: visiblePapers,
       },
     ];
-  }, [papers, groupBy]);
+  }, [visiblePapers, groupBy]);
 
   return (
     <div className="page">
@@ -1366,14 +1749,195 @@ useEffect(() => {
         </div>
       )}
 
+      {/* ---------------- FOLDERS ---------------- */}
+
+      {!loading &&
+        (papers.length > 0 ||
+          folders.length > 0) && (
+          <section className="pf-folder-section">
+            <div className="pf-folder-head">
+              <div className="pf-folder-title">
+                <Folder size={15} />
+                Folders
+              </div>
+
+              {folders.length > 0 && (
+                <span className="pf-folder-hint">
+                  Drag a paper onto a folder, or
+                  use “Add to folder” on a card.
+                </span>
+              )}
+            </div>
+
+            <div className="pf-folder-row">
+              <div
+                className={`pf-folder-chip ${
+                  activeFolder === "all"
+                    ? "is-active"
+                    : ""
+                }`}
+              >
+                <button
+                  type="button"
+                  className="pf-folder-main"
+                  onClick={() =>
+                    setActiveFolder("all")
+                  }
+                >
+                  <Library size={14} />
+                  All papers
+                  <span className="pf-chip-count">
+                    {papers.length}
+                  </span>
+                </button>
+              </div>
+
+              {folders.map((folder) => (
+                <div
+                  key={folder.id}
+                  className={`pf-folder-chip ${
+                    activeFolder === folder.id
+                      ? "is-active"
+                      : ""
+                  } ${
+                    dragOverFolder === folder.id
+                      ? "is-drop-target"
+                      : ""
+                  }`}
+                  onDragOver={(event) =>
+                    handleFolderDragOver(
+                      event,
+                      folder
+                    )
+                  }
+                  onDragLeave={(event) =>
+                    handleFolderDragLeave(
+                      event,
+                      folder
+                    )
+                  }
+                  onDrop={(event) =>
+                    handleFolderDrop(
+                      event,
+                      folder
+                    )
+                  }
+                >
+                  <button
+                    type="button"
+                    className="pf-folder-main"
+                    onClick={() =>
+                      setActiveFolder(folder.id)
+                    }
+                  >
+                    <span
+                      className="pf-folder-dot"
+                      style={{
+                        background: folder.color,
+                      }}
+                    />
+                    {folder.name}
+                    <span className="pf-chip-count">
+                      {(folder.paper_ids || []).length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="pf-icon-button"
+                    title="Rename folder"
+                    onClick={() =>
+                      handleRenameFolder(folder)
+                    }
+                  >
+                    <PenLine size={13} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="pf-icon-button"
+                    title="Delete folder"
+                    onClick={() =>
+                      handleDeleteFolder(folder)
+                    }
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+
+              {creatingFolder ? (
+                <form
+                  className="pf-new-folder"
+                  onSubmit={handleCreateFolder}
+                >
+                  <input
+                    autoFocus
+                    type="text"
+                    value={newFolderName}
+                    maxLength={150}
+                    placeholder="Folder name, e.g. Datasets"
+                    onChange={(event) =>
+                      setNewFolderName(
+                        event.target.value
+                      )
+                    }
+                  />
+
+                  <button
+                    type="submit"
+                    className="pf-small-button pf-small-primary"
+                    disabled={
+                      !newFolderName.trim()
+                    }
+                  >
+                    Create
+                  </button>
+
+                  <button
+                    type="button"
+                    className="pf-small-button"
+                    onClick={() => {
+                      setCreatingFolder(false);
+                      setNewFolderName("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  className="pf-folder-add"
+                  onClick={() =>
+                    setCreatingFolder(true)
+                  }
+                >
+                  <FolderPlus size={14} />
+                  New folder
+                </button>
+              )}
+            </div>
+
+            {folderError && (
+              <div className="soft-notice pf-folder-error">
+                {folderError}
+              </div>
+            )}
+          </section>
+        )}
+
       {!loading && papers.length > 0 && (
         <div className="paper-library-toolbar">
           <div>
             <span className="paper-library-count">
-              {papers.length}{" "}
-              {papers.length === 1
+              {visiblePapers.length}{" "}
+              {visiblePapers.length === 1
                 ? "paper"
                 : "papers"}
+              {activeFolderObj
+                ? ` in “${activeFolderObj.name}”`
+                : ""}
             </span>
 
             <span className="paper-library-toolbar-text">
@@ -1446,6 +2010,22 @@ useEffect(() => {
       )}
 
       {!loading &&
+        activeFolderObj &&
+        visiblePapers.length === 0 && (
+          <div className="pf-empty-folder">
+            <FolderOpen size={22} />
+            <strong>
+              “{activeFolderObj.name}” is empty
+            </strong>
+            <span>
+              Go to “All papers”, then drag a
+              paper onto this folder or use “Add
+              to folder” on its card.
+            </span>
+          </div>
+        )}
+
+      {!loading &&
         groupedPapers.map((group) => (
           <section
             className="paper-library-group"
@@ -1475,135 +2055,251 @@ useEffect(() => {
             )}
 
             <section className="paper-library-grid">
-              {group.papers.map((paper) => (
-                <button
-                  className="paper-library-card"
-                  key={`${group.label}-${paper.id}`}
-                  onClick={() =>
-                    onOpenPaper(paper.id)
-                  }
-                >
-                  <div className="paper-card-top">
-  <div className="paper-card-icon">
-    <FileText size={21} />
-  </div>
+              {group.papers.map((paper) => {
+                const paperFolders =
+                  foldersByPaper[paper.id] || [];
 
-  <div
-    className="paper-card-actions"
-    onClick={(event) => {
-      event.stopPropagation();
-    }}
-  >
-    <span className="paper-status">
-      {paper.status || "To Read"}
-    </span>
+                const availableFolders =
+                  folders.filter(
+                    (folder) =>
+                      !(
+                        folder.paper_ids || []
+                      ).includes(paper.id)
+                  );
 
-    <span
-      className="paper-delete-button"
-      role="button"
-      tabIndex={0}
-      title="Delete paper"
-      onClick={(event) => {
-        event.stopPropagation();
-        handleDeletePaper(paper);
-      }}
-      onKeyDown={(event) => {
-        if (
-          event.key === "Enter" ||
-          event.key === " "
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          handleDeletePaper(paper);
-        }
-      }}
-    >
-      ×
-    </span>
-  </div>
-</div>
+                return (
+                  <div
+                    className="pf-card-wrap"
+                    key={`${group.label}-${paper.id}`}
+                  >
+                    <div
+                      className={`paper-library-card ${
+                        draggingPaperId === paper.id
+                          ? "pf-dragging"
+                          : ""
+                      }`}
+                      role="button"
+                      tabIndex={0}
+                      draggable
+                      onDragStart={(event) =>
+                        handlePaperDragStart(
+                          event,
+                          paper
+                        )
+                      }
+                      onDragEnd={handlePaperDragEnd}
+                      onClick={() =>
+                        onOpenPaper(paper.id)
+                      }
+                      onKeyDown={(event) => {
+                        if (
+                          event.target !==
+                          event.currentTarget
+                        ) {
+                          return;
+                        }
 
-                  <h3>{paper.title}</h3>
+                        if (
+                          event.key === "Enter" ||
+                          event.key === " "
+                        ) {
+                          event.preventDefault();
+                          onOpenPaper(paper.id);
+                        }
+                      }}
+                    >
+                      <div className="paper-card-top">
+                        <div className="paper-card-icon">
+                          <FileText size={21} />
+                        </div>
 
-                  <p>
-                    {paper.authors ||
-                      "Authors not available"}
-                  </p>
-
-                  <div className="paper-card-meta">
-                    {paper.year && (
-                      <span>{paper.year}</span>
-                    )}
-
-                    {paper.journal && (
-                      <>
-                        <span>·</span>
-
-                        <span>
-                          {paper.journal}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  {paper.tags && (
-                    <div className="paper-card-tags">
-                      {getPaperTopics(paper)
-                        .slice(0, 3)
-                        .map((topic) => (
-                          <span key={topic}>
-                            {topic}
+                        <div
+                          className="paper-card-actions"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                          }}
+                        >
+                          <span className="paper-status">
+                            {paper.status || "To Read"}
                           </span>
-                        ))}
-                    </div>
-                  )}
 
-                  {(() => {
-                    const notesCount =
-                      getPaperNotesCount(paper);
+                          <span
+                            className="paper-delete-button"
+                            role="button"
+                            tabIndex={0}
+                            title="Delete paper"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleDeletePaper(paper);
+                            }}
+                            onKeyDown={(event) => {
+                              if (
+                                event.key === "Enter" ||
+                                event.key === " "
+                              ) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handleDeletePaper(paper);
+                              }
+                            }}
+                          >
+                            ×
+                          </span>
+                        </div>
+                      </div>
 
-                    return (
-                      <div
-                        className={`paper-card-notes ${
-                          notesCount > 0
-                            ? "has-notes"
-                            : "no-notes"
-                        }`}
-                      >
-                        <NotebookPen size={13} />
+                      <h3>{paper.title}</h3>
+
+                      <p>
+                        {paper.authors ||
+                          "Authors not available"}
+                      </p>
+
+                      <div className="paper-card-meta">
+                        {paper.year && (
+                          <span>{paper.year}</span>
+                        )}
+
+                        {paper.journal && (
+                          <>
+                            <span>·</span>
+
+                            <span>
+                              {paper.journal}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      {paper.tags && (
+                        <div className="paper-card-tags">
+                          {getPaperTopics(paper)
+                            .slice(0, 3)
+                            .map((topic) => (
+                              <span key={topic}>
+                                {topic}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+
+                      {(() => {
+                        const notesCount =
+                          getPaperNotesCount(paper);
+
+                        return (
+                          <div
+                            className={`paper-card-notes ${
+                              notesCount > 0
+                                ? "has-notes"
+                                : "no-notes"
+                            }`}
+                          >
+                            <NotebookPen size={13} />
+                            <span>
+                              {notesCount > 0
+                                ? `${notesCount} ${
+                                    notesCount === 1
+                                      ? "note"
+                                      : "notes"
+                                  } added`
+                                : "No notes yet"}
+                            </span>
+                          </div>
+                        );
+                      })()}
+
+                      <div className="paper-card-bottom">
+                        <div className="tiny-progress">
+                          <span
+                            style={{
+                              width: `${paper.progress ?? 0}%`,
+                            }}
+                          />
+                        </div>
+
                         <span>
-                          {notesCount > 0
-                            ? `${notesCount} ${
-                                notesCount === 1
-                                  ? "note"
-                                  : "notes"
-                              } added`
-                            : "No notes yet"}
+                          {paper.progress ?? 0}%
                         </span>
                       </div>
-                    );
-                  })()}
 
-                  <div className="paper-card-bottom">
-                    <div className="tiny-progress">
-                      <span
-                        style={{
-                          width: `${paper.progress ?? 0}%`,
-                        }}
-                      />
+                      <div className="paper-open-label">
+                        Open paper
+                        <ArrowRight size={15} />
+                      </div>
                     </div>
 
-                    <span>
-                      {paper.progress ?? 0}%
-                    </span>
-                  </div>
+                    {(paperFolders.length > 0 ||
+                      availableFolders.length > 0) && (
+                      <div className="pf-card-folders">
+                        {paperFolders.map((folder) => (
+                          <span
+                            key={folder.id}
+                            className="pf-mini-chip"
+                          >
+                            <i
+                              style={{
+                                background:
+                                  folder.color,
+                              }}
+                            />
+                            {folder.name}
+                            <button
+                              type="button"
+                              title="Remove from this folder"
+                              onClick={() =>
+                                removePaperFromFolder(
+                                  folder.id,
+                                  paper.id
+                                )
+                              }
+                            >
+                              <X size={11} />
+                            </button>
+                          </span>
+                        ))}
 
-                  <div className="paper-open-label">
-                    Open paper
-                    <ArrowRight size={15} />
+                        {availableFolders.length >
+                          0 && (
+                          <select
+                            className="pf-add-select"
+                            value=""
+                            aria-label="Add to folder"
+                            onChange={(event) => {
+                              const folderId =
+                                Number(
+                                  event.target.value
+                                );
+
+                              if (folderId) {
+                                addPaperToFolder(
+                                  folderId,
+                                  paper.id
+                                );
+                              }
+                            }}
+                          >
+                            <option value="">
+                              + Add to folder
+                            </option>
+
+                            {availableFolders.map(
+                              (folder) => (
+                                <option
+                                  key={folder.id}
+                                  value={folder.id}
+                                >
+                                  {folder.name}
+                                </option>
+                              )
+                            )}
+                          </select>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </section>
           </section>
         ))}
