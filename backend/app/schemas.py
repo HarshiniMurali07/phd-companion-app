@@ -424,3 +424,13 @@ class PaperDatasetResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+# =========================================================
+# PAPER DETAILS (edit title / authors / year / journal)
+# =========================================================
+
+class PaperDetailsUpdate(BaseModel):
+    title: str | None = None
+    authors: str | None = None
+    year: int | None = None
+    journal: str | None = None
