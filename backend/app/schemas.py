@@ -348,3 +348,24 @@ class LearningQuizResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+# =========================================================
+# FOLDERS
+# =========================================================
+
+class FolderCreate(BaseModel):
+    name: str
+    color: str = "#6366f1"
+
+
+class FolderUpdate(BaseModel):
+    name: str | None = None
+    color: str | None = None
+
+
+class FolderResponse(BaseModel):
+    id: int
+    name: str
+    color: str
+    created_at: datetime
+    paper_ids: list[int] = []
