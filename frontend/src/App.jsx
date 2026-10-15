@@ -52,6 +52,7 @@ import PaperNotesPanel from "./components/PaperNotesPanel.jsx";
 
 import PaperDatasetsPanel from "./components/PaperDatasetsPanel.jsx";
 import DatasetMatrixPage from "./components/DatasetMatrixPage.jsx";
+import EditPaperDetailsModal from "./components/EditPaperDetailsModal.jsx";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
@@ -3227,6 +3228,9 @@ const [connectionModalOpen, setConnectionModalOpen] =
   const [learningTopics, setLearningTopics] =
     useState([]);
 
+  const [editDetailsOpen, setEditDetailsOpen] =
+    useState(false);
+
   useEffect(() => {
   async function loadPaper() {
     try {
@@ -3511,6 +3515,14 @@ async function handleConnectionCreated() {
               {sections.length} sections
             </span>
           </div>
+                    <button
+            type="button"
+            className="secondary-button pd-edit-details"
+            onClick={() => setEditDetailsOpen(true)}
+          >
+            <PenLine size={14} />
+            Edit details
+          </button>
         </div>
       </section>
 
@@ -4095,6 +4107,16 @@ async function handleConnectionCreated() {
     }
   />
 )}
+            {editDetailsOpen && (
+        <EditPaperDetailsModal
+          paper={paper}
+          onClose={() => setEditDetailsOpen(false)}
+          onSaved={(updates) => {
+            handlePaperUpdated(updates);
+            setEditDetailsOpen(false);
+          }}
+        />
+      )}
       {saveToLearnOpen && (
   <SaveToLearnModal
     paper={paper}
