@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 
 from sqlalchemy.orm import relationship
@@ -648,4 +649,93 @@ class LearningQuiz(Base):
     topic = relationship(
         "LearningTopic",
         back_populates="quizzes",
+    )
+
+
+# =========================================================
+# FOLDERS (paper groups)
+# =========================================================
+
+class Folder(Base):
+    __tablename__ = "folders"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    name = Column(
+        String(150),
+        nullable=False,
+        unique=True,
+    )
+
+    color = Column(
+        String(20),
+        nullable=False,
+        default="#6366f1",
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+    paper_links = relationship(
+        "PaperFolder",
+        back_populates="folder",
+        cascade="all, delete-orphan",
+    )
+
+
+# =========================================================
+# PAPER <-> FOLDER (many-to-many)
+# =========================================================
+
+class PaperFolder(Base):
+    __tablename__ = "paper_folders"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "paper_id",
+            "folder_id",
+            name="uq_paper_folder",
+        ),
+    )
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    paper_id = Column(
+        Integer,
+        ForeignKey(
+            "papers.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    folder_id = Column(
+        Integer,
+        ForeignKey(
+            "folders.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+    folder = relationship(
+        "Folder",
+        back_populates="paper_links",
     )
