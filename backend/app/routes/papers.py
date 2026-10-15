@@ -21,7 +21,7 @@ from ..database import get_db
 from ..models import Paper, PaperSection
 from ..schemas import (
     PaperCreate,
-    PaperDetailsUpdate
+    PaperDetailsUpdate,
     PaperListResponse,
     PaperNotesUpdate,
     PaperResponse,
