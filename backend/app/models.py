@@ -739,3 +739,100 @@ class PaperFolder(Base):
         "Folder",
         back_populates="paper_links",
     )
+
+# =========================================================
+# PAPER DATASETS (datasets / cohorts used by a paper)
+# =========================================================
+
+class PaperDataset(Base):
+    __tablename__ = "paper_datasets"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    paper_id = Column(
+        Integer,
+        ForeignKey(
+            "papers.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    name = Column(
+        String(255),
+        nullable=False,
+    )
+
+    country = Column(
+        String(150),
+        nullable=True,
+    )
+
+    sample_size = Column(
+        String(100),
+        nullable=True,
+    )
+
+    population = Column(
+        Text,
+        nullable=True,
+    )
+
+    # comma-separated: diabetes,hypertension,cvd,ckd,anaemia,other
+    diseases = Column(
+        String(255),
+        nullable=True,
+    )
+
+    imaging = Column(
+        String(150),
+        nullable=True,
+    )
+
+    label_definition = Column(
+        Text,
+        nullable=True,
+    )
+
+    # Yes / No / Unclear
+    external_validation = Column(
+        String(50),
+        nullable=True,
+    )
+
+    # Public / Credentialed / Restricted / On request / Unknown
+    access = Column(
+        String(50),
+        nullable=True,
+    )
+
+    access_note = Column(
+        Text,
+        nullable=True,
+    )
+
+    notes = Column(
+        Text,
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    paper = relationship(
+        "Paper",
+        foreign_keys=[paper_id],
+    )
