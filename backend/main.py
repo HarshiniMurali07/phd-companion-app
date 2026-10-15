@@ -15,6 +15,7 @@ from app.routes import (
     gaps,
     experiments,
     learn,
+    folders,
 )
 
 
@@ -85,6 +86,10 @@ app.include_router(
 
 app.include_router(
     learn.router
+)
+
+app.include_router(
+    folders.router
 )
 
 
