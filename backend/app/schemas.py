@@ -369,3 +369,58 @@ class FolderResponse(BaseModel):
     color: str
     created_at: datetime
     paper_ids: list[int] = []
+
+# =========================================================
+# PAPER DATASETS
+# =========================================================
+
+class PaperDatasetCreate(BaseModel):
+    name: str
+    country: str | None = None
+    sample_size: str | None = None
+    population: str | None = None
+    diseases: str | None = None
+    imaging: str | None = None
+    label_definition: str | None = None
+    external_validation: str | None = None
+    access: str | None = None
+    access_note: str | None = None
+    notes: str | None = None
+
+
+class PaperDatasetUpdate(BaseModel):
+    name: str | None = None
+    country: str | None = None
+    sample_size: str | None = None
+    population: str | None = None
+    diseases: str | None = None
+    imaging: str | None = None
+    label_definition: str | None = None
+    external_validation: str | None = None
+    access: str | None = None
+    access_note: str | None = None
+    notes: str | None = None
+
+
+class PaperDatasetResponse(BaseModel):
+    id: int
+    paper_id: int
+    name: str
+    country: str | None = None
+    sample_size: str | None = None
+    population: str | None = None
+    diseases: str | None = None
+    imaging: str | None = None
+    label_definition: str | None = None
+    external_validation: str | None = None
+    access: str | None = None
+    access_note: str | None = None
+    notes: str | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+    paper_title: str | None = None
+    paper_year: int | None = None
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
