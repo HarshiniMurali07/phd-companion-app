@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+import os
+
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import (
@@ -7,6 +9,7 @@ from app.database import (
 )
 
 from app import models
+from app.security import verify_api_key
 
 from app.routes import (
     papers,
@@ -17,7 +20,6 @@ from app.routes import (
     learn,
     folders,
     datasets,
-
 )
 
 
@@ -25,9 +27,9 @@ from app.routes import (
 # DATABASE
 # =========================================================
 
-Base.metadata.create_all(
-    bind=engine
-)
+# Only needed when you add a NEW table: set RUN_CREATE_ALL=1 in Vercel once.
+if os.getenv("RUN_CREATE_ALL") == "1":
+    Base.metadata.create_all(bind=engine)
 
 
 # =========================================================
@@ -56,47 +58,28 @@ app.add_middleware(
         "https://phd-companion-app.vercel.app",
         "https://phd-companion-74mwdwypy-harshinimurali07.vercel.app",
     ],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 # =========================================================
-# ROUTES
+# ROUTES (all protected by the API key)
 # =========================================================
 
-app.include_router(
-    papers.router
-)
+protected = [Depends(verify_api_key)]
 
-app.include_router(
-    research.router
-)
+app.include_router(papers.router, dependencies=protected)
+app.include_router(research.router, dependencies=protected)
+app.include_router(connections.router, dependencies=protected)
+app.include_router(gaps.router, dependencies=protected)
+app.include_router(experiments.router, dependencies=protected)
+app.include_router(learn.router, dependencies=protected)
+app.include_router(folders.router, dependencies=protected)
+app.include_router(datasets.router, dependencies=protected)
 
-app.include_router(
-    connections.router
-)
 
-app.include_router(
-    gaps.router
-)
-
-app.include_router(
-    experiments.router
-)
-
-app.include_router(
-    learn.router
-)
-
-app.include_router(
-    folders.router
-)
-
-app.include_router(
-    datasets.router
-)
 # =========================================================
 # ROOT
 # =========================================================
