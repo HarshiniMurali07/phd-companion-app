@@ -2,7 +2,6 @@ import re
 from functools import lru_cache
 
 import numpy as np
-from fastembed import TextEmbedding
 
 
 # ============================================================
@@ -11,12 +10,7 @@ from fastembed import TextEmbedding
 
 @lru_cache(maxsize=1)
 def get_embedding_model():
-    """
-    Load the local embedding model once.
-
-    FastEmbed runs the embedding model locally with
-    ONNX Runtime and does not require an API key.
-    """
+    from fastembed import TextEmbedding  # loaded only when first needed
 
     return TextEmbedding(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
