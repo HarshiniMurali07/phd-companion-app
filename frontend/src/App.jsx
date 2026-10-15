@@ -50,6 +50,9 @@ import {
 import "./paper-workspace.css";
 import PaperNotesPanel from "./components/PaperNotesPanel.jsx";
 
+import PaperDatasetsPanel from "./components/PaperDatasetsPanel.jsx";
+import DatasetMatrixPage from "./components/DatasetMatrixPage.jsx";
+
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
   "https://phd-companion-app-backend.vercel.app"
@@ -68,6 +71,7 @@ const navigation = [
       { id: "knowledge", label: "Knowledge", icon: Network },
       { id: "gaps", label: "Research Gaps", icon: Lightbulb },
       { id: "experiments", label: "Experiments", icon: FlaskConical },
+      { id: "datasets", label: "Dataset Matrix", icon: Database },
     ],
   },
   {
@@ -113,6 +117,7 @@ const navigation = [
       label: "Thesis",
       icon: FileText,
     },
+     
   ],
 },
 ];
@@ -323,6 +328,10 @@ function App() {
 
           {activePage === "knowledge" && (
             <KnowledgePage />
+          )}
+          
+          {activePage === "datasets" && (
+            <DatasetMatrixPage />
           )}
 
           {activePage === "gaps" && (
@@ -3529,6 +3538,19 @@ async function handleConnectionCreated() {
           <NotebookPen size={15} />
           My Notes
         </button>
+                <button
+          className={
+            workspaceTab === "datasets"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setWorkspaceTab("datasets")
+          }
+        >
+          <Database size={15} />
+          Datasets
+        </button>
       </div>
 
       {workspaceTab === "paper" ? (
@@ -3979,6 +4001,10 @@ async function handleConnectionCreated() {
             </aside>
           </div>
         </>
+            ) : workspaceTab === "datasets" ? (
+        <div className="paper-notes-workspace">
+          <PaperDatasetsPanel paperId={paperId} />
+        </div>
       ) : (
         <div className="paper-notes-workspace">
           <div className="paper-notes-workspace-grid">
