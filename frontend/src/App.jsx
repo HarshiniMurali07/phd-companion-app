@@ -2183,32 +2183,6 @@ function PapersPage({ onOpenPaper }) {
                         </div>
                       )}
 
-                      {(() => {
-                        const notesCount =
-                          getPaperNotesCount(paper);
-
-                        return (
-                          <div
-                            className={`paper-card-notes ${
-                              notesCount > 0
-                                ? "has-notes"
-                                : "no-notes"
-                            }`}
-                          >
-                            <NotebookPen size={13} />
-                            <span>
-                              {notesCount > 0
-                                ? `${notesCount} ${
-                                    notesCount === 1
-                                      ? "note"
-                                      : "notes"
-                                  } added`
-                                : "No notes yet"}
-                            </span>
-                          </div>
-                        );
-                      })()}
-
                       <div className="paper-card-bottom">
                         <div className="tiny-progress">
                           <span
