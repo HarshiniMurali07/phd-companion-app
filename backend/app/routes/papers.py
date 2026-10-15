@@ -3,9 +3,8 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-import fitz
+
 from dotenv import load_dotenv
-from supabase import create_client 
 
 from fastapi import (
     APIRouter,
@@ -47,24 +46,32 @@ router = APIRouter(
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv(
-    "SUPABASE_SERVICE_ROLE_KEY"
-)
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-if not SUPABASE_URL:
-    raise RuntimeError(
-        "SUPABASE_URL is not configured."
-    )
+_supabase_client = None
 
-if not SUPABASE_SERVICE_ROLE_KEY:
-    raise RuntimeError(
-        "SUPABASE_SERVICE_ROLE_KEY is not configured."
-    )
 
-supabase = create_client(
-    SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY,
-)
+class _LazySupabase:
+    """Creates the Supabase client on first use, not at startup."""
+
+    def __getattr__(self, name):
+        global _supabase_client
+
+        if _supabase_client is None:
+            if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+                raise RuntimeError(
+                    "Supabase environment variables are not configured."
+                )
+            from supabase import create_client
+
+            _supabase_client = create_client(
+                SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+            )
+
+        return getattr(_supabase_client, name)
+
+
+supabase = _LazySupabase()
 
 PAPERS_BUCKET = "papers"
 
