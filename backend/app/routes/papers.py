@@ -1575,7 +1575,7 @@ def extract_pdf_information(
     """
     Extract complete paper information.
     """
-
+import fitz  
     document = fitz.open(
         pdf_path
     )
@@ -1977,7 +1977,7 @@ async def upload_paper(
             stored_filename,
             contents,
         )
-
+        import fitz
         # Extract directly from the uploaded PDF bytes.
         document = fitz.open(
             stream=contents,
