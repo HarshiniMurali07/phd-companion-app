@@ -1575,7 +1575,7 @@ def extract_pdf_information(
     """
     Extract complete paper information.
     """
-import fitz  
+    import fitz  
     document = fitz.open(
         pdf_path
     )
